@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fichajes — Control de obra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --azul:#1C2E3A;
+    --azul-suave:#2C4356;
+    --ambar:#F0A202;
+    --ambar-oscuro:#C9840A;
+    --hormigon:#F1EEE7;
+    --acero:#5B6B76;
+    --alerta:#C1440E;
+    --exito:#4C7A52;
+    --blanco:#FFFFFF;
+    --radio:6px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Inter',sans-serif;background:var(--hormigon);color:var(--azul);}
+  h1,h2,h3,.titular{font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.2px;}
+  button{font-family:inherit;cursor:pointer;border:none;}
+  input,select,textarea{font-family:inherit;}
+  .oculto{display:none !important;}
+
+  /* ---------- LOGIN ---------- */
+  #pantalla-login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--azul);padding:20px;}
+  .tarjeta-login{background:var(--blanco);width:100%;max-width:360px;padding:32px 28px;border-radius:var(--radio);border-top:6px solid var(--ambar);}
+  .tarjeta-login h1{font-size:28px;margin:0 0 4px;color:var(--azul);}
+  .tarjeta-login p{color:var(--acero);margin:0 0 24px;font-size:14px;}
+  .campo{margin-bottom:16px;}
+  .campo label{display:block;font-size:12px;font-weight:600;color:var(--acero);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
+  .campo input, .campo select, .campo textarea{width:100%;padding:11px 12px;border:1px solid #D8D3C8;border-radius:4px;font-size:15px;}
+  .btn{display:block;width:100%;padding:13px;border-radius:4px;font-size:15px;font-weight:600;}
+  .btn-primario{background:var(--ambar);color:var(--azul);}
+  .btn-primario:hover{background:var(--ambar-oscuro);}
+  .btn-oscuro{background:var(--azul);color:var(--blanco);}
+  .btn-borde{background:transparent;border:1px solid var(--azul);color:var(--azul);}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+  .error{background:#FBEAE3;color:var(--alerta);padding:10px 12px;border-radius:4px;font-size:13px;margin-bottom:14px;}
+
+  /* ---------- APP ---------- */
+  #app{min-height:100vh;padding-bottom:70px;}
+  header.top{background:var(--azul);color:var(--blanco);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;}
+  header.top .marca{font-size:22px;}
+  header.top .marca span{color:var(--ambar);}
+  .acciones-top{display:flex;align-items:center;gap:14px;}
+  .campana{position:relative;font-size:20px;background:none;color:var(--blanco);padding:4px;}
+  .badge{position:absolute;top:-4px;right:-4px;background:var(--alerta);color:#fff;font-size:10px;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;}
+  main{max-width:960px;margin:0 auto;padding:20px;}
+  .panel{background:var(--blanco);border-radius:var(--radio);padding:20px;margin-bottom:18px;border:1px solid #E4DFD3;}
+  .panel h2{margin:0 0 14px;font-size:20px;border-bottom:2px solid var(--hormigon);padding-bottom:8px;}
+  .estado-pill{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;}
+  .estado-SIN_FICHAR{background:#E4DFD3;color:var(--acero);}
+  .estado-TRABAJANDO{background:#E1EDE2;color:var(--exito);}
+  .estado-EN_PAUSA{background:#FDF0DC;color:var(--ambar-oscuro);}
+  .estado-FINALIZADO{background:#EAE6F5;color:#5B4B8A;}
+
+  .rejilla-fichaje{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px;}
+  .btn-fichar{padding:18px 8px;border-radius:var(--radio);font-size:15px;font-weight:700;text-align:center;color:#fff;}
+  .btn-fichar small{display:block;font-weight:400;font-size:11px;margin-top:3px;opacity:.85;}
+  .btn-entrada{background:var(--exito);}
+  .btn-pausa{background:var(--ambar-oscuro);}
+  .btn-salida{background:var(--alerta);}
+
+  .stats{display:flex;gap:24px;margin-top:16px;flex-wrap:wrap;}
+  .stat b{display:block;font-size:26px;font-family:'Barlow Condensed',sans-serif;}
+  .stat span{font-size:12px;color:var(--acero);text-transform:uppercase;}
+
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th,td{text-align:left;padding:9px 8px;border-bottom:1px solid #EDE9DE;}
+  th{color:var(--acero);font-size:12px;text-transform:uppercase;font-weight:600;}
+
+  .tabs-admin{display:flex;gap:6px;overflow-x:auto;margin-bottom:16px;}
+  .tab-btn{background:var(--blanco);border:1px solid #D8D3C8;padding:9px 16px;border-radius:20px;font-size:13px;font-weight:600;white-space:nowrap;color:var(--acero);}
+  .tab-btn.activo{background:var(--azul);color:var(--blanco);border-color:var(--azul);}
+
+  .lista-notif{max-height:340px;overflow-y:auto;}
+  .notif{padding:12px;border-bottom:1px solid #EDE9DE;}
+  .notif.no-leida{background:#FDF6E9;}
+  .notif b{display:block;font-size:14px;}
+  .notif small{color:var(--acero);}
+
+  footer.tabbar{position:fixed;bottom:0;left:0;right:0;background:var(--azul);display:flex;justify-content:space-around;padding:8px 0;}
+  footer.tabbar button{background:none;color:#B9C4CC;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 10px;}
+  footer.tabbar button.activo{color:var(--ambar);}
+
+  @media (min-width:720px){
+    footer.tabbar{display:none;}
+    #app{padding-bottom:0;}
+  }
+  .seccion-vista{display:none;}
+  .seccion-vista.visible{display:block;}
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<div id="pantalla-login">
+  <div class="tarjeta-login">
+    <h1>Control de <span style="color:var(--ambar-oscuro)">obra</span></h1>
+    <p>Fichajes, partes y seguimiento de horas</p>
+    <div id="error-login" class="error oculto"></div>
+    <div class="campo">
+      <label>Usuario</label>
+      <input type="text" id="input-usuario" autocomplete="username">
+    </div>
+    <div class="campo">
+      <label>Contraseña</label>
+      <input type="password" id="input-password" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primario" id="btn-login">Entrar</button>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app" class="oculto">
+  <header class="top">
+    <div class="marca titular">FICHA<span>OBRA</span></div>
+    <div class="acciones-top">
+      <button class="campana" id="btn-campana">🔔<span id="badge-notif" class="badge oculto">0</span></button>
+      <button class="btn btn-borde" style="width:auto;padding:6px 14px;color:#fff;border-color:#5B6B76;" id="btn-salir-sesion">Salir</button>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ---- VISTA EMPLEADO ---- -->
+    <section id="vista-empleado" class="seccion-vista">
+      <div class="panel">
+        <h2>Mi jornada de hoy <span id="pill-estado" class="estado-pill estado-SIN_FICHAR">Sin fichar</span></h2>
+        <div id="error-fichaje" class="error oculto"></div>
+        <div class="rejilla-fichaje">
+          <button class="btn-fichar btn-entrada" data-tipo="entrada">Entrada<small>Empezar jornada</small></button>
+          <button class="btn-fichar btn-pausa" data-tipo="pausa_inicio">Iniciar pausa<small>Descanso</small></button>
+          <button class="btn-fichar btn-pausa" data-tipo="pausa_fin">Fin de pausa<small>Reanudar</small></button>
+          <button class="btn-fichar btn-salida" data-tipo="salida">Salida<small>Terminar jornada</small></button>
+        </div>
+        <div class="stats">
+          <div class="stat"><b id="stat-horas">0.0h</b><span>Horas trabajadas</span></div>
+          <div class="stat"><b id="stat-pausa">0.0h</b><span>Horas de pausa</span></div>
+        </div>
+        <table style="margin-top:16px;">
+          <thead><tr><th>Evento</th><th>Hora</th></tr></thead>
+          <tbody id="tabla-fichajes-hoy"></tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h2>Mi obra asignada</h2>
+        <div id="contenido-mi-obra">Sin obra asignada todavía.</div>
+      </div>
+
+      <div class="panel">
+        <h2>Solicitar corrección de horario</h2>
+        <div id="error-correccion" class="error oculto"></div>
+        <div class="campo"><label>Fecha del fichaje</label><input type="date" id="corr-fecha"></div>
+        <div class="campo"><label>Tipo</label>
+          <select id="corr-tipo">
+            <option value="entrada">Entrada</option>
+            <option value="pausa_inicio">Inicio de pausa</option>
+            <option value="pausa_fin">Fin de pausa</option>
+            <option value="salida">Salida</option>
+          </select>
+        </div>
+        <div class="campo"><label>Hora correcta</label><input type="time" id="corr-hora"></div>
+        <div class="campo"><label>Motivo</label><textarea id="corr-motivo" rows="2"></textarea></div>
+        <button class="btn btn-oscuro" id="btn-enviar-correccion" style="width:auto;padding:10px 18px;">Enviar solicitud</button>
+
+        <h3 style="margin-top:22px;font-size:16px;">Mis solicitudes</h3>
+        <table>
+          <thead><tr><th>Fecha</th><th>Tipo</th><th>Estado</th></tr></thead>
+          <tbody id="tabla-mis-correcciones"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ---- VISTA ADMIN ---- -->
+    <section id="vista-admin" class="seccion-vista">
+      <div class="tabs-admin">
+        <button class="tab-btn activo" data-tab="equipo">Equipo</button>
+        <button class="tab-btn" data-tab="obras">Obras</button>
+        <button class="tab-btn" data-tab="correcciones">Correcciones</button>
+        <button class="tab-btn" data-tab="informes">Informes</button>
+        <button class="tab-btn" data-tab="auditoria">Auditoría</button>
+      </div>
+
+      <div class="panel admin-tab" data-tab="equipo">
+        <h2>Estado del equipo en vivo</h2>
+        <table><thead><tr><th>Empleado</th><th>Estado</th><th>Horas hoy</th><th>Obra</th></tr></thead>
+          <tbody id="tabla-equipo"></tbody></table>
+        <h3 style="margin-top:22px;font-size:16px;">Dar de alta un empleado</h3>
+        <div class="campo"><label>Nombre</label><input id="nuevo-nombre"></div>
+        <div class="campo"><label>Usuario</label><input id="nuevo-usuario"></div>
+        <div class="campo"><label>Contraseña provisional</label><input id="nuevo-password" type="text"></div>
+        <div class="campo"><label>Rol</label>
+          <select id="nuevo-rol"><option value="empleado">Empleado</option><option value="admin">Administrador</option></select>
+        </div>
+        <button class="btn btn-oscuro" id="btn-crear-empleado" style="width:auto;padding:10px 18px;">Crear usuario</button>
+      </div>
+
+      <div class="panel admin-tab oculto" data-tab="obras">
+        <h2>Obras</h2>
+        <table><thead><tr><th>Nombre</th><th>Dirección</th><th>Estado</th></tr></thead>
+          <tbody id="tabla-obras"></tbody></table>
+        <h3 style="margin-top:22px;font-size:16px;">Nueva obra</h3>
+        <div class="campo"><label>Nombre</label><input id="obra-nombre"></div>
+        <div class="campo"><label>Dirección</label><input id="obra-direccion"></div>
+        <button class="btn btn-oscuro" id="btn-crear-obra" style="width:auto;padding:10px 18px;">Crear obra</button>
+
+        <h3 style="margin-top:22px;font-size:16px;">Asignar obra a empleado</h3>
+        <div class="campo"><label>Empleado</label><select id="asignar-empleado"></select></div>
+        <div class="campo"><label>Obra</label><select id="asignar-obra"></select></div>
+        <button class="btn btn-oscuro" id="btn-asignar-obra" style="width:auto;padding:10px 18px;">Asignar</button>
+      </div>
+
+      <div class="panel admin-tab oculto" data-tab="correcciones">
+        <h2>Solicitudes de corrección pendientes</h2>
+        <table><thead><tr><th>Empleado</th><th>Fecha</th><th>Tipo</th><th>Motivo</th><th>Acción</th></tr></thead>
+          <tbody id="tabla-correcciones"></tbody></table>
+      </div>
+
+      <div class="panel admin-tab oculto" data-tab="informes">
+        <h2>Informe mensual (PDF)</h2>
+        <div class="campo"><label>Empleado</label><select id="informe-empleado"></select></div>
+        <div class="campo"><label>Mes</label><input type="number" min="1" max="12" id="informe-mes"></div>
+        <div class="campo"><label>Año</label><input type="number" id="informe-anio"></div>
+        <button class="btn btn-primario" id="btn-descargar-pdf" style="width:auto;padding:10px 18px;">Descargar PDF</button>
+      </div>
+
+      <div class="panel admin-tab oculto" data-tab="auditoria">
+        <h2>Registro de auditoría</h2>
+        <table><thead><tr><th>Fecha</th><th>Actor</th><th>Rol</th><th>Acción</th><th>Detalle</th></tr></thead>
+          <tbody id="tabla-auditoria"></tbody></table>
+      </div>
+    </section>
+
+    <!-- ---- NOTIFICACIONES (compartido) ---- -->
+    <section id="vista-notificaciones" class="seccion-vista">
+      <div class="panel">
+        <h2>Notificaciones</h2>
+        <div class="lista-notif" id="lista-notificaciones"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="tabbar">
+    <button class="tab-inferior activo" data-vista="empleado">Fichaje</button>
+    <button class="tab-inferior oculto" data-vista="admin" id="tab-admin">Admin</button>
+    <button class="tab-inferior" data-vista="notificaciones">Notificaciones</button>
+  </footer>
+</div>
+
+<script>
+/* =======================================================================
+   CONFIGURA AQUÍ LA URL DE TU DESPLIEGUE DE GOOGLE APPS SCRIPT
+   (Implementar > Nueva implementación > Aplicación web > Acceso: Cualquiera)
+   ======================================================================= */
+const API_URL = 'PON_AQUI_TU_URL_DE_APPS_SCRIPT';
+
+let estadoApp = { token: null, rol: null, nombre: null, empleadoId: null };
+
+// --- Llamada genérica a la API ---
+// Content-Type text/plain evita el preflight CORS que Apps Script no gestiona.
+async function api(action, extra) {
+  const cuerpo = Object.assign({ action: action, token: estadoApp.token }, extra || {});
+  const resp = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(cuerpo)
+  });
+  const json = await resp.json();
+  if (!json.ok) throw new Error(json.error || 'Error desconocido');
+  return json.data;
+}
+
+function obtenerUbicacion() {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) return reject(new Error('Este dispositivo no soporta geolocalización'));
+    navigator.geolocation.getCurrentPosition(
+      pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, precision: pos.coords.accuracy }),
+      () => reject(new Error('Debes permitir el acceso a tu ubicación para fichar')),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  });
+}
+
+function mostrarError(id, mensaje) {
+  const el = document.getElementById(id);
+  el.textContent = mensaje;
+  el.classList.remove('oculto');
+  setTimeout(() => el.classList.add('oculto'), 5000);
+}
+
+// --- LOGIN ---
+document.getElementById('btn-login').addEventListener('click', async () => {
+  const usuario = document.getElementById('input-usuario').value.trim();
+  const password = document.getElementById('input-password').value;
+  try {
+    const data = await apiSinToken('login', { usuario, password });
+    estadoApp = { token: data.token, rol: data.rol, nombre: data.nombre, empleadoId: data.empleadoId };
+    sessionStorage.setItem('sesionFichajes', JSON.stringify(estadoApp));
+    arrancarApp();
+  } catch (e) {
+    mostrarError('error-login', e.message);
+  }
+});
+
+async function apiSinToken(action, extra) {
+  const resp = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(Object.assign({ action }, extra))
+  });
+  const json = await resp.json();
+  if (!json.ok) throw new Error(json.error);
+  return json.data;
+}
+
+document.getElementById('btn-salir-sesion').addEventListener('click', async () => {
+  try { await api('logout'); } catch (e) {}
+  sessionStorage.removeItem('sesionFichajes');
+  location.reload();
+});
+
+// --- Restaurar sesión ---
+(function restaurar() {
+  const guardada = sessionStorage.getItem('sesionFichajes');
+  if (guardada) { estadoApp = JSON.parse(guardada); arrancarApp(); }
+})();
+
+function arrancarApp() {
+  document.getElementById('pantalla-login').classList.add('oculto');
+  document.getElementById('app').classList.remove('oculto');
+  if (estadoApp.rol === 'admin') document.getElementById('tab-admin').classList.remove('oculto');
+  cambiarVista(estadoApp.rol === 'admin' ? 'admin' : 'empleado');
+  cargarTodo();
+  setInterval(cargarNotificaciones, 30000);
+}
+
+// --- Navegación inferior ---
+document.querySelectorAll('.tab-inferior').forEach(btn => {
+  btn.addEventListener('click', () => cambiarVista(btn.dataset.vista));
+});
+function cambiarVista(nombre) {
+  document.querySelectorAll('.seccion-vista').forEach(s => s.classList.remove('visible'));
+  document.getElementById('vista-' + nombre).classList.add('visible');
+  document.querySelectorAll('.tab-inferior').forEach(b => b.classList.toggle('activo', b.dataset.vista === nombre));
+  if (nombre === 'admin') cargarAdmin();
+  if (nombre === 'notificaciones') cargarNotificaciones(true);
+}
+document.getElementById('btn-campana').addEventListener('click', () => cambiarVista('notificaciones'));
+
+function cargarTodo() {
+  cargarResumenHoy();
+  cargarMiObra();
+  cargarMisCorrecciones();
+  cargarNotificaciones();
+  if (estadoApp.rol === 'admin') cargarAdmin();
+}
+
+// --- FICHAJE ---
+document.querySelectorAll('.btn-fichar').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    document.querySelectorAll('.btn-fichar').forEach(b => b.disabled = true); // evita doble clic mientras se procesa
+    try {
+      const ubicacion = await obtenerUbicacion();
+      const resumen = await api('fichar', { tipo: btn.dataset.tipo, lat: ubicacion.lat, lng: ubicacion.lng, precision: ubicacion.precision });
+      pintarResumenHoy(resumen);
+      cargarNotificaciones();
+    } catch (e) {
+      mostrarError('error-fichaje', e.message);
+    } finally {
+      actualizarBotonesSegunEstado();
+    }
+  });
+});
+
+async function cargarResumenHoy() {
+  const resumen = await api('resumenHoy');
+  pintarResumenHoy(resumen);
+}
+
+function pintarResumenHoy(r) {
+  const pill = document.getElementById('pill-estado');
+  const etiquetas = { SIN_FICHAR: 'Sin fichar', TRABAJANDO: 'Trabajando', EN_PAUSA: 'En pausa', FINALIZADO: 'Jornada finalizada' };
+  pill.textContent = etiquetas[r.estado];
+  pill.className = 'estado-pill estado-' + r.estado;
+  document.getElementById('stat-horas').textContent = r.horasTrabajadas + 'h';
+  document.getElementById('stat-pausa').textContent = r.horasPausa + 'h';
+  document.getElementById('tabla-fichajes-hoy').innerHTML = r.fichajesHoy.map(f =>
+    `<tr><td>${etiquetaVisual(f.tipo)}</td><td>${f.hora}</td></tr>`).join('') || '<tr><td colspan="2">Todavía no hay fichajes hoy</td></tr>';
+  estadoApp._estadoActual = r.estado;
+  actualizarBotonesSegunEstado();
+}
+
+function etiquetaVisual(tipo) {
+  return { entrada: 'Entrada', pausa_inicio: 'Inicio de pausa', pausa_fin: 'Fin de pausa', salida: 'Salida' }[tipo] || tipo;
+}
+
+function actualizarBotonesSegunEstado() {
+  const permitido = {
+    SIN_FICHAR: ['entrada'], TRABAJANDO: ['pausa_inicio', 'salida'],
+    EN_PAUSA: ['pausa_fin'], FINALIZADO: []
+  }[estadoApp._estadoActual] || [];
+  document.querySelectorAll('.btn-fichar').forEach(b => {
+    b.disabled = permitido.indexOf(b.dataset.tipo) === -1;
+  });
+}
+
+// --- MI OBRA ---
+async function cargarMiObra() {
+  const obra = await api('miObra');
+  document.getElementById('contenido-mi-obra').innerHTML = obra
+    ? `<b>${obra.nombre}</b><br><span style="color:var(--acero)">${obra.direccion || ''}</span><br><span class="estado-pill estado-TRABAJANDO" style="margin-top:8px;">${obra.estado}</span>`
+    : 'Sin obra asignada todavía.';
+}
+
+// --- CORRECCIONES (empleado) ---
+document.getElementById('btn-enviar-correccion').addEventListener('click', async () => {
+  const fecha = document.getElementById('corr-fecha').value;
+  const tipoSolicitado = document.getElementById('corr-tipo').value;
+  const horaSolicitada = document.getElementById('corr-hora').value;
+  const motivo = document.getElementById('corr-motivo').value;
+  if (!fecha || !horaSolicitada) { mostrarError('error-correccion', 'Indica fecha y hora'); return; }
+  try {
+    await api('solicitarCorreccion', { fecha, tipoSolicitado, horaSolicitada, motivo });
+    document.getElementById('corr-motivo').value = '';
+    cargarMisCorrecciones();
+  } catch (e) { mostrarError('error-correccion', e.message); }
+});
+
+async function cargarMisCorrecciones() {
+  const filas = await api('misCorrecciones');
+  document.getElementById('tabla-mis-correcciones').innerHTML = filas.map(f =>
+    `<tr><td>${f.fecha}</td><td>${etiquetaVisual(f.tipoSolicitado)}</td><td>${f.estado}</td></tr>`
+  ).join('') || '<tr><td colspan="3">Sin solicitudes</td></tr>';
+}
+
+// --- NOTIFICACIONES ---
+async function cargarNotificaciones(marcarVistoEnUI) {
+  const notifs = await api('misNotificaciones');
+  const noLeidas = notifs.filter(n => !n.leida).length;
+  const badge = document.getElementById('badge-notif');
+  badge.textContent = noLeidas;
+  badge.classList.toggle('oculto', noLeidas === 0);
+  document.getElementById('lista-notificaciones').innerHTML = notifs.map(n =>
+    `<div class="notif ${n.leida ? '' : 'no-leida'}" data-id="${n.id}"><b>${n.titulo}</b>${n.mensaje}<br><small>${new Date(n.fecha).toLocaleString('es-ES')}</small></div>`
+  ).join('') || '<p>No tienes notificaciones.</p>';
+
+  document.querySelectorAll('#lista-notificaciones .notif.no-leida').forEach(el => {
+    el.addEventListener('click', async () => {
+      await api('marcarNotificacionLeida', { notifId: el.dataset.id });
+      el.classList.remove('no-leida');
+      cargarNotificaciones();
+    });
+  });
+}
+
+// --- ADMIN ---
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('activo'));
+    btn.classList.add('activo');
+    document.querySelectorAll('.admin-tab').forEach(p => p.classList.toggle('oculto', p.dataset.tab !== btn.dataset.tab));
+  });
+});
+
+async function cargarAdmin() {
+  const [equipo, empleados, obras, correcciones] = await Promise.all([
+    api('adminEstadoEquipo'), api('adminListEmpleados'), api('adminListObras'), api('adminListCorrecciones')
+  ]);
+
+  const mapaObras = {}; obras.forEach(o => mapaObras[o.id] = o.nombre);
+  const mapaEmpleados = {}; empleados.forEach(e => mapaEmpleados[e.id] = e);
+
+  document.getElementById('tabla-equipo').innerHTML = equipo.map(e =>
+    `<tr><td>${e.nombre}</td><td><span class="estado-pill estado-${e.estado}">${e.estado}</span></td><td>${e.horasTrabajadas}h</td><td>${mapaObras[mapaEmpleados[e.empleadoId]?.obraId] || '—'}</td></tr>`
+  ).join('');
+
+  document.getElementById('tabla-obras').innerHTML = obras.map(o =>
+    `<tr><td>${o.nombre}</td><td>${o.direccion || ''}</td><td>${o.estado}</td></tr>`
+  ).join('') || '<tr><td colspan="3">Sin obras creadas</td></tr>';
+
+  const opcionesEmpleados = empleados.filter(e => e.rol === 'empleado').map(e => `<option value="${e.id}">${e.nombre}</option>`).join('');
+  document.getElementById('asignar-empleado').innerHTML = opcionesEmpleados;
+  document.getElementById('informe-empleado').innerHTML = opcionesEmpleados;
+  document.getElementById('asignar-obra').innerHTML = obras.map(o => `<option value="${o.id}">${o.nombre}</option>`).join('');
+
+  document.getElementById('tabla-correcciones').innerHTML = correcciones.map(c =>
+    `<tr><td>${mapaEmpleados[c.empleadoId]?.nombre || c.empleadoId}</td><td>${c.fecha}</td><td>${etiquetaVisual(c.tipoSolicitado)} → ${c.horaSolicitada}</td><td>${c.motivo}</td>
+     <td><button class="btn btn-primario" style="width:auto;padding:6px 10px;display:inline-block;" onclick="resolverCorreccion('${c.id}', true)">Aprobar</button>
+     <button class="btn btn-borde" style="width:auto;padding:6px 10px;display:inline-block;margin-left:6px;" onclick="resolverCorreccion('${c.id}', false)">Rechazar</button></td></tr>`
+  ).join('') || '<tr><td colspan="5">No hay solicitudes pendientes</td></tr>';
+
+  const hoy = new Date();
+  if (!document.getElementById('informe-mes').value) document.getElementById('informe-mes').value = hoy.getMonth() + 1;
+  if (!document.getElementById('informe-anio').value) document.getElementById('informe-anio').value = hoy.getFullYear();
+
+  const auditoria = await api('adminAuditoria', { limite: 200 });
+  document.getElementById('tabla-auditoria').innerHTML = auditoria.map(a =>
+    `<tr><td>${new Date(a.timestamp).toLocaleString('es-ES')}</td><td>${mapaEmpleados[a.actorId]?.nombre || a.actorId}</td><td>${a.rol}</td><td>${a.accion}</td><td>${a.detalle}</td></tr>`
+  ).join('');
+}
+
+async function resolverCorreccion(correccionId, aprobar) {
+  const respuesta = prompt(aprobar ? 'Comentario (opcional) para aprobar:' : 'Motivo del rechazo:') || '';
+  await api('adminResolverCorreccion', { correccionId, aprobar, respuesta });
+  cargarAdmin();
+}
+
+document.getElementById('btn-crear-empleado').addEventListener('click', async () => {
+  await api('adminCrearEmpleado', {
+    nombre: document.getElementById('nuevo-nombre').value,
+    usuario: document.getElementById('nuevo-usuario').value,
+    password: document.getElementById('nuevo-password').value,
+    rol: document.getElementById('nuevo-rol').value
+  });
+  ['nuevo-nombre','nuevo-usuario','nuevo-password'].forEach(id => document.getElementById(id).value = '');
+  cargarAdmin();
+});
+
+document.getElementById('btn-crear-obra').addEventListener('click', async () => {
+  await api('adminCrearObra', { nombre: document.getElementById('obra-nombre').value, direccion: document.getElementById('obra-direccion').value });
+  document.getElementById('obra-nombre').value = ''; document.getElementById('obra-direccion').value = '';
+  cargarAdmin();
+});
+
+document.getElementById('btn-asignar-obra').addEventListener('click', async () => {
+  await api('adminAsignarObra', {
+    empleadoId: document.getElementById('asignar-empleado').value,
+    obraId: document.getElementById('asignar-obra').value
+  });
+  cargarAdmin();
+});
+
+document.getElementById('btn-descargar-pdf').addEventListener('click', async () => {
+  const data = await api('adminResumenMensualPDF', {
+    empleadoId: document.getElementById('informe-empleado').value,
+    mes: parseInt(document.getElementById('informe-mes').value, 10),
+    anio: parseInt(document.getElementById('informe-anio').value, 10)
+  });
+  const bytes = atob(data.base64);
+  const array = new Uint8Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) array[i] = bytes.charCodeAt(i);
+  const blob = new Blob([array], { type: 'application/pdf' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = data.nombreArchivo;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+});
+</script>
+</body>
+</html>
