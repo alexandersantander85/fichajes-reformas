@@ -1,164 +1,488 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fichajes — Control de obra</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fichajes — Control de obra (Cyber Dark Edition)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- Font Awesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <style>
-  :root{
-    --azul:#1C2E3A;
-    --azul-suave:#2C4356;
-    --ambar:#F0A202;
-    --ambar-oscuro:#C9840A;
-    --hormigon:#F1EEE7;
-    --acero:#5B6B76;
-    --alerta:#C1440E;
-    --exito:#4C7A52;
-    --blanco:#FFFFFF;
-    --radio:6px;
+  :root {
+    --bg-dark: #080B11;
+    --bg-card: rgba(17, 24, 39, 0.7);
+    --bg-card-hover: rgba(30, 41, 59, 0.8);
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-glow: rgba(0, 242, 254, 0.25);
+    
+    --neon-cyan: #00F2FE;
+    --neon-blue: #4FACFE;
+    --neon-amber: #FFB703;
+    --neon-red: #FF4B4B;
+    --neon-green: #10B981;
+    --neon-purple: #8B5CF6;
+
+    --text-main: #F3F4F6;
+    --text-muted: #9CA3AF;
+    --text-dim: #6B7280;
+    
+    --radius: 12px;
+    --glow-shadow: 0 0 20px rgba(0, 242, 254, 0.15);
   }
-  *{box-sizing:border-box;}
-  body{margin:0;font-family:'Inter',sans-serif;background:var(--hormigon);color:var(--azul);}
-  h1,h2,h3,.titular{font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.2px;}
-  button{font-family:inherit;cursor:pointer;border:none;}
-  input,select,textarea{font-family:inherit;}
-  .oculto{display:none !important;}
 
-  /* ---------- LOGIN ---------- */
-  #pantalla-login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--azul);padding:20px;}
-  .tarjeta-login{background:var(--blanco);width:100%;max-width:360px;padding:32px 28px;border-radius:var(--radio);border-top:6px solid var(--ambar);}
-  .tarjeta-login h1{font-size:28px;margin:0 0 4px;color:var(--azul);}
-  .tarjeta-login p{color:var(--acero);margin:0 0 24px;font-size:14px;}
-  .campo{margin-bottom:16px;}
-  .campo label{display:block;font-size:12px;font-weight:600;color:var(--acero);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
-  .campo input, .campo select, .campo textarea{width:100%;padding:11px 12px;border:1px solid #D8D3C8;border-radius:4px;font-size:15px;}
-  .btn{display:block;width:100%;padding:13px;border-radius:4px;font-size:15px;font-weight:600;}
-  .btn-primario{background:var(--ambar);color:var(--azul);}
-  .btn-primario:hover{background:var(--ambar-oscuro);}
-  .btn-oscuro{background:var(--azul);color:var(--blanco);}
-  .btn-borde{background:transparent;border:1px solid var(--azul);color:var(--azul);}
-  .btn:disabled{opacity:.4;cursor:not-allowed;}
-  .error{background:#FBEAE3;color:var(--alerta);padding:10px 12px;border-radius:4px;font-size:13px;margin-bottom:14px;}
-
-  /* ---------- APP ---------- */
-  #app{min-height:100vh;padding-bottom:70px;}
-  header.top{background:var(--azul);color:var(--blanco);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;}
-  header.top .marca{font-size:22px;}
-  header.top .marca span{color:var(--ambar);}
-  .acciones-top{display:flex;align-items:center;gap:14px;}
-  .campana{position:relative;font-size:20px;background:none;color:var(--blanco);padding:4px;}
-  .badge{position:absolute;top:-4px;right:-4px;background:var(--alerta);color:#fff;font-size:10px;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;}
-  main{max-width:960px;margin:0 auto;padding:20px;}
-  .panel{background:var(--blanco);border-radius:var(--radio);padding:20px;margin-bottom:18px;border:1px solid #E4DFD3;}
-  .panel h2{margin:0 0 14px;font-size:20px;border-bottom:2px solid var(--hormigon);padding-bottom:8px;}
-  .estado-pill{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;}
-  .estado-SIN_FICHAR{background:#E4DFD3;color:var(--acero);}
-  .estado-TRABAJANDO{background:#E1EDE2;color:var(--exito);}
-  .estado-EN_PAUSA{background:#FDF0DC;color:var(--ambar-oscuro);}
-  .estado-FINALIZADO{background:#EAE6F5;color:#5B4B8A;}
-
-  .rejilla-fichaje{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px;}
-  .btn-fichar{padding:18px 8px;border-radius:var(--radio);font-size:15px;font-weight:700;text-align:center;color:#fff;}
-  .btn-fichar small{display:block;font-weight:400;font-size:11px;margin-top:3px;opacity:.85;}
-  .btn-entrada{background:var(--exito);}
-  .btn-pausa{background:var(--ambar-oscuro);}
-  .btn-salida{background:var(--alerta);}
-
-  .stats{display:flex;gap:24px;margin-top:16px;flex-wrap:wrap;}
-  .stat b{display:block;font-size:26px;font-family:'Barlow Condensed',sans-serif;}
-  .stat span{font-size:12px;color:var(--acero);text-transform:uppercase;}
-
-  table{width:100%;border-collapse:collapse;font-size:14px;}
-  th,td{text-align:left;padding:9px 8px;border-bottom:1px solid #EDE9DE;}
-  th{color:var(--acero);font-size:12px;text-transform:uppercase;font-weight:600;}
-
-  .tabs-admin{display:flex;gap:6px;overflow-x:auto;margin-bottom:16px;}
-  .tab-btn{background:var(--blanco);border:1px solid #D8D3C8;padding:9px 16px;border-radius:20px;font-size:13px;font-weight:600;white-space:nowrap;color:var(--acero);}
-  .tab-btn.activo{background:var(--azul);color:var(--blanco);border-color:var(--azul);}
-
-  .lista-notif{max-height:340px;overflow-y:auto;}
-  .notif{padding:12px;border-bottom:1px solid #EDE9DE;}
-  .notif.no-leida{background:#FDF6E9;}
-  .notif b{display:block;font-size:14px;}
-  .notif small{color:var(--acero);}
-
-  footer.tabbar{position:fixed;bottom:0;left:0;right:0;background:var(--azul);display:flex;justify-content:space-around;padding:8px 0;}
-  footer.tabbar button{background:none;color:#B9C4CC;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 10px;}
-  footer.tabbar button.activo{color:var(--ambar);}
-
-  @media (min-width:720px){
-    footer.tabbar{display:none;}
-    #app{padding-bottom:0;}
+  * { box-sizing: border-box; transition: all 0.2s ease-in-out; }
+  
+  body {
+    margin: 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg-dark);
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(0, 242, 254, 0.05) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.05) 0px, transparent 50%);
+    color: var(--text-main);
+    min-height: 100vh;
   }
-  .seccion-vista{display:none;}
-  .seccion-vista.visible{display:block;}
+
+  h1, h2, h3, .titular {
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 0.5px;
+  }
+
+  button { font-family: inherit; cursor: pointer; border: none; outline: none; }
+  input, select, textarea { font-family: inherit; outline: none; }
+  .oculto { display: none !important; }
+
+  #pantalla-login {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at center, #0F172A 0%, #080B11 100%);
+    padding: 20px;
+    position: relative;
+  }
+
+  .tarjeta-login {
+    background: var(--bg-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    width: 100%;
+    max-width: 400px;
+    padding: 36px 30px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tarjeta-login::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-blue));
+    box-shadow: 0 0 10px var(--neon-cyan);
+  }
+
+  .tarjeta-login h1 {
+    font-size: 26px;
+    margin: 0 0 6px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tarjeta-login p { color: var(--text-muted); margin: 0 0 24px; font-size: 13px; }
+
+  .campo { margin-bottom: 18px; }
+  .campo label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--neon-cyan);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .campo input, .campo select, .campo textarea {
+    width: 100%;
+    padding: 12px 14px;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 14px;
+    color: #fff;
+  }
+  .campo input:focus, .campo select:focus, .campo textarea:focus {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 12px rgba(0, 242, 254, 0.2);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 13px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .btn-primario {
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+    color: #080B11;
+    box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
+  }
+  .btn-primario:hover {
+    box-shadow: 0 6px 20px rgba(0, 242, 254, 0.5);
+    transform: translateY(-1px);
+  }
+  .btn-oscuro {
+    background: rgba(30, 41, 59, 0.8);
+    color: #fff;
+    border: 1px solid var(--border-color);
+  }
+  .btn-oscuro:hover {
+    background: rgba(51, 65, 85, 0.9);
+    border-color: var(--text-muted);
+  }
+  .btn-borde {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+  }
+  .btn-borde:hover {
+    border-color: var(--neon-cyan);
+    color: var(--neon-cyan);
+  }
+  .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+  .error {
+    background: rgba(255, 75, 75, 0.15);
+    border: 1px solid var(--neon-red);
+    color: #FF8888;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  #app { min-height: 100vh; padding-bottom: 80px; }
+  
+  header.top {
+    background: rgba(11, 15, 25, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-color);
+    padding: 14px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  header.top .marca {
+    font-size: 20px;
+    font-weight: 900;
+    color: #fff;
+  }
+  header.top .marca span { color: var(--neon-cyan); }
+  
+  .clock-widget {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    color: var(--neon-cyan);
+    background: rgba(0, 242, 254, 0.08);
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(0, 242, 254, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .acciones-top { display: flex; align-items: center; gap: 14px; }
+  .campana {
+    position: relative;
+    font-size: 18px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+  }
+  .campana:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--neon-cyan); }
+  .badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--neon-red);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 10px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 8px var(--neon-red);
+  }
+
+  main { max-width: 1050px; margin: 0 auto; padding: 24px 20px; }
+
+  .panel {
+    background: var(--bg-card);
+    backdrop-filter: blur(12px);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  }
+  .panel h2 {
+    margin: 0 0 18px;
+    font-size: 18px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #fff;
+  }
+
+  .estado-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .estado-SIN_FICHAR { background: rgba(156, 163, 175, 0.15); color: #9CA3AF; border: 1px solid #9CA3AF; }
+  .estado-TRABAJANDO { background: rgba(16, 185, 129, 0.15); color: var(--neon-green); border: 1px solid var(--neon-green); box-shadow: 0 0 10px rgba(16,185,129,0.2); }
+  .estado-EN_PAUSA { background: rgba(255, 183, 3, 0.15); color: var(--neon-amber); border: 1px solid var(--neon-amber); }
+  .estado-FINALIZADO { background: rgba(139, 92, 246, 0.15); color: var(--neon-purple); border: 1px solid var(--neon-purple); }
+
+  .rejilla-fichaje {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .btn-fichar {
+    padding: 16px 12px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    color: #fff;
+    border: 1px solid transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .btn-fichar small { font-weight: 400; font-size: 11px; opacity: 0.75; }
+  .btn-entrada { background: linear-gradient(135deg, rgba(16, 185, 129, 0.8), rgba(5, 150, 105, 0.8)); border-color: var(--neon-green); }
+  .btn-pausa { background: linear-gradient(135deg, rgba(245, 158, 11, 0.8), rgba(217, 119, 6, 0.8)); border-color: var(--neon-amber); }
+  .btn-salida { background: linear-gradient(135deg, rgba(239, 68, 68, 0.8), rgba(220, 38, 38, 0.8)); border-color: var(--neon-red); }
+
+  .stats { display: flex; gap: 16px; margin-top: 20px; flex-wrap: wrap; }
+  .stat {
+    flex: 1;
+    min-width: 140px;
+    background: rgba(15, 23, 42, 0.6);
+    padding: 14px 18px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+  }
+  .stat b { display: block; font-size: 24px; font-family: 'Orbitron', monospace; color: var(--neon-cyan); }
+  .stat span { font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+
+  .table-responsive { width: 100%; overflow-x: auto; margin-top: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; text-align: left; }
+  th, td { padding: 12px 14px; border-bottom: 1px solid var(--border-color); }
+  th { color: var(--text-muted); font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .tabs-admin { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 20px; padding-bottom: 4px; }
+  .tab-btn {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid var(--border-color);
+    padding: 10px 18px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--text-muted);
+  }
+  .tab-btn:hover { color: #fff; border-color: var(--neon-cyan); }
+  .tab-btn.activo {
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+    color: #080B11;
+    font-weight: 700;
+    border-color: transparent;
+  }
+
+  .lista-notif { max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+  .notif {
+    padding: 14px 16px;
+    border-radius: 8px;
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+  }
+  .notif.no-leida {
+    background: rgba(0, 242, 254, 0.05);
+    border-color: rgba(0, 242, 254, 0.3);
+  }
+  .notif b { display: block; font-size: 14px; color: #fff; margin-bottom: 4px; }
+  .notif small { color: var(--text-dim); display: block; margin-top: 6px; font-size: 11px; }
+
+  footer.tabbar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(8, 11, 17, 0.95);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+    z-index: 90;
+  }
+  footer.tabbar button {
+    background: none;
+    color: var(--text-muted);
+    font-size: 11px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+  }
+  footer.tabbar button i { font-size: 16px; }
+  footer.tabbar button.activo { color: var(--neon-cyan); }
+
+  .search-bar {
+    width: 100%;
+    margin-bottom: 14px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--border-color);
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: #fff;
+  }
+
+  @media (min-width: 720px) {
+    footer.tabbar { display: none; }
+    #app { padding-bottom: 0; }
+  }
+  
+  .seccion-vista { display: none; }
+  .seccion-vista.visible { display: block; animation: fadeIn 0.3s ease-in-out; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 </style>
 </head>
 <body>
 
-<!-- ================= LOGIN ================= -->
 <div id="pantalla-login">
   <div class="tarjeta-login">
-    <h1>Control de <span style="color:var(--ambar-oscuro)">obra</span></h1>
-    <p>Fichajes, partes y seguimiento de horas</p>
+    <h1><i class="fa-solid fa-hard-hat" style="color:var(--neon-cyan)"></i> FICHA<span>OBRA</span></h1>
+    <p>Control de obra y seguimiento digital</p>
+    
     <div id="error-login" class="error oculto"></div>
+    
     <div class="campo">
-      <label>Usuario</label>
-      <input type="text" id="input-usuario" autocomplete="username">
+      <label><i class="fa-solid fa-user"></i> Usuario</label>
+      <input type="text" id="input-usuario" placeholder="Ej: j.perez" autocomplete="username">
     </div>
     <div class="campo">
-      <label>Contraseña</label>
-      <input type="password" id="input-password" autocomplete="current-password">
+      <label><i class="fa-solid fa-lock"></i> Contraseña</label>
+      <input type="password" id="input-password" placeholder="••••••••" autocomplete="current-password">
     </div>
-    <button class="btn btn-primario" id="btn-login">Entrar</button>
+    <button class="btn btn-primario" id="btn-login"><i class="fa-solid fa-right-to-bracket"></i> Entrar al Sistema</button>
   </div>
 </div>
 
-<!-- ================= APP ================= -->
 <div id="app" class="oculto">
   <header class="top">
-    <div class="marca titular">FICHA<span>OBRA</span></div>
+    <div class="marca titular"><i class="fa-solid fa-hard-hat" style="color:var(--neon-cyan)"></i> FICHA<span>OBRA</span></div>
+    
+    <div class="clock-widget" id="live-clock">
+      <i class="fa-solid fa-clock"></i> <span id="clock-time">00:00:00</span>
+    </div>
+
     <div class="acciones-top">
-      <button class="campana" id="btn-campana">🔔<span id="badge-notif" class="badge oculto">0</span></button>
-      <button class="btn btn-borde" style="width:auto;padding:6px 14px;color:#fff;border-color:#5B6B76;" id="btn-salir-sesion">Salir</button>
+      <button class="campana" id="btn-campana" title="Notificaciones">
+        <i class="fa-solid fa-bell"></i><span id="badge-notif" class="badge oculto">0</span>
+      </button>
+      <button class="btn btn-borde" style="width:auto; padding:8px 14px;" id="btn-salir-sesion">
+        <i class="fa-solid fa-power-off"></i> <span style="display:none;" class="sm:inline">Salir</span>
+      </button>
     </div>
   </header>
 
   <main>
 
-    <!-- ---- VISTA EMPLEADO ---- -->
     <section id="vista-empleado" class="seccion-vista">
       <div class="panel">
-        <h2>Mi jornada de hoy <span id="pill-estado" class="estado-pill estado-SIN_FICHAR">Sin fichar</span></h2>
+        <h2>
+          <span><i class="fa-solid fa-business-time" style="color:var(--neon-cyan)"></i> Mi Jornada de Hoy</span>
+          <span id="pill-estado" class="estado-pill estado-SIN_FICHAR">Sin fichar</span>
+        </h2>
+        
         <div id="error-fichaje" class="error oculto"></div>
+        
         <div class="rejilla-fichaje">
-          <button class="btn-fichar btn-entrada" data-tipo="entrada">Entrada<small>Empezar jornada</small></button>
-          <button class="btn-fichar btn-pausa" data-tipo="pausa_inicio">Iniciar pausa<small>Descanso</small></button>
-          <button class="btn-fichar btn-pausa" data-tipo="pausa_fin">Fin de pausa<small>Reanudar</small></button>
-          <button class="btn-fichar btn-salida" data-tipo="salida">Salida<small>Terminar jornada</small></button>
+          <button class="btn-fichar btn-entrada" data-tipo="entrada"><i class="fa-solid fa-play"></i>Entrada<small>Empezar</small></button>
+          <button class="btn-fichar btn-pausa" data-tipo="pausa_inicio"><i class="fa-solid fa-pause"></i>Iniciar pausa<small>Descanso</small></button>
+          <button class="btn-fichar btn-pausa" data-tipo="pausa_fin"><i class="fa-solid fa-rotate-left"></i>Fin pausa<small>Reanudar</small></button>
+          <button class="btn-fichar btn-salida" data-tipo="salida"><i class="fa-solid fa-stop"></i>Salida<small>Terminar</small></button>
         </div>
+        
         <div class="stats">
           <div class="stat"><b id="stat-horas">0.0h</b><span>Horas trabajadas</span></div>
           <div class="stat"><b id="stat-pausa">0.0h</b><span>Horas de pausa</span></div>
         </div>
-        <table style="margin-top:16px;">
-          <thead><tr><th>Evento</th><th>Hora</th></tr></thead>
-          <tbody id="tabla-fichajes-hoy"></tbody>
-        </table>
+        
+        <div class="table-responsive">
+          <table>
+            <thead><tr><th>Evento</th><th>Hora</th></tr></thead>
+            <tbody id="tabla-fichajes-hoy"></tbody>
+          </table>
+        </div>
       </div>
 
       <div class="panel">
-        <h2>Mi obra asignada</h2>
-        <div id="contenido-mi-obra">Sin obra asignada todavía.</div>
+        <h2><i class="fa-solid fa-helmet-safety" style="color:var(--neon-blue)"></i> Mi obra asignada</h2>
+        <div id="contenido-mi-obra">Cargando información de obra...</div>
       </div>
 
       <div class="panel">
-        <h2>Solicitar corrección de horario</h2>
+        <h2><i class="fa-solid fa-pen-to-square" style="color:var(--neon-amber)"></i> Solicitar corrección de horario</h2>
         <div id="error-correccion" class="error oculto"></div>
         <div class="campo"><label>Fecha del fichaje</label><input type="date" id="corr-fecha"></div>
-        <div class="campo"><label>Tipo</label>
+        <div class="campo"><label>Tipo de Evento</label>
           <select id="corr-tipo">
             <option value="entrada">Entrada</option>
             <option value="pausa_inicio">Inicio de pausa</option>
@@ -167,81 +491,112 @@
           </select>
         </div>
         <div class="campo"><label>Hora correcta</label><input type="time" id="corr-hora"></div>
-        <div class="campo"><label>Motivo</label><textarea id="corr-motivo" rows="2"></textarea></div>
-        <button class="btn btn-oscuro" id="btn-enviar-correccion" style="width:auto;padding:10px 18px;">Enviar solicitud</button>
+        <div class="campo"><label>Motivo justificativo</label><textarea id="corr-motivo" rows="2"></textarea></div>
+        <button class="btn btn-oscuro" id="btn-enviar-correccion" style="width:auto;"><i class="fa-solid fa-paper-plane"></i> Enviar solicitud</button>
 
-        <h3 style="margin-top:22px;font-size:16px;">Mis solicitudes</h3>
-        <table>
-          <thead><tr><th>Fecha</th><th>Tipo</th><th>Estado</th></tr></thead>
-          <tbody id="tabla-mis-correcciones"></tbody>
-        </table>
+        <h3 style="margin-top:28px; font-size:15px; color:var(--text-muted);"><i class="fa-solid fa-clock-rotate-left"></i> Mis Solicitudes Recientes</h3>
+        <div class="table-responsive">
+          <table>
+            <thead><tr><th>Fecha</th><th>Tipo</th><th>Estado</th></tr></thead>
+            <tbody id="tabla-mis-correcciones"></tbody>
+          </table>
+        </div>
       </div>
     </section>
 
-    <!-- ---- VISTA ADMIN ---- -->
     <section id="vista-admin" class="seccion-vista">
       <div class="tabs-admin">
-        <button class="tab-btn activo" data-tab="equipo">Equipo</button>
-        <button class="tab-btn" data-tab="obras">Obras</button>
-        <button class="tab-btn" data-tab="correcciones">Correcciones</button>
-        <button class="tab-btn" data-tab="informes">Informes</button>
-        <button class="tab-btn" data-tab="auditoria">Auditoría</button>
+        <button class="tab-btn activo" data-tab="equipo"><i class="fa-solid fa-users"></i> Equipo</button>
+        <button class="tab-btn" data-tab="obras"><i class="fa-solid fa-city"></i> Obras</button>
+        <button class="tab-btn" data-tab="correcciones"><i class="fa-solid fa-clipboard-check"></i> Correcciones</button>
+        <button class="tab-btn" data-tab="informes"><i class="fa-solid fa-file-pdf"></i> Informes</button>
+        <button class="tab-btn" data-tab="auditoria"><i class="fa-solid fa-shield-halved"></i> Auditoría</button>
       </div>
 
       <div class="panel admin-tab" data-tab="equipo">
-        <h2>Estado del equipo en vivo</h2>
-        <table><thead><tr><th>Empleado</th><th>Estado</th><th>Horas hoy</th><th>Obra</th></tr></thead>
-          <tbody id="tabla-equipo"></tbody></table>
-        <h3 style="margin-top:22px;font-size:16px;">Dar de alta un empleado</h3>
-        <div class="campo"><label>Nombre</label><input id="nuevo-nombre"></div>
-        <div class="campo"><label>Usuario</label><input id="nuevo-usuario"></div>
+        <h2>
+          <span><i class="fa-solid fa-users-gear"></i> Estado del Equipo en Vivo</span>
+          <button class="btn btn-borde" style="width:auto; padding:4px 10px; font-size:11px;" onclick="exportarTablaCSV('tabla-equipo', 'equipo_fichajes.csv')"><i class="fa-solid fa-download"></i> Exportar CSV</button>
+        </h2>
+        <input type="text" id="filter-equipo" class="search-bar" placeholder="🔎 Buscar por empleado u obra..." onkeyup="filtrarTabla('filter-equipo', 'tabla-equipo')">
+        <div class="table-responsive">
+          <table>
+            <thead><tr><th>Empleado</th><th>Estado</th><th>Horas hoy</th><th>Obra</th></tr></thead>
+            <tbody id="tabla-equipo"></tbody>
+          </table>
+        </div>
+        
+        <h3 style="margin-top:28px; font-size:15px; color:var(--neon-cyan);"><i class="fa-solid fa-user-plus"></i> Dar de alta un empleado</h3>
+        <div class="campo"><label>Nombre completo</label><input id="nuevo-nombre"></div>
+        <div class="campo"><label>Usuario de acceso</label><input id="nuevo-usuario"></div>
         <div class="campo"><label>Contraseña provisional</label><input id="nuevo-password" type="text"></div>
-        <div class="campo"><label>Rol</label>
+        <div class="campo"><label>Rol en plataforma</label>
           <select id="nuevo-rol"><option value="empleado">Empleado</option><option value="admin">Administrador</option></select>
         </div>
-        <button class="btn btn-oscuro" id="btn-crear-empleado" style="width:auto;padding:10px 18px;">Crear usuario</button>
+        <button class="btn btn-oscuro" id="btn-crear-empleado" style="width:auto;"><i class="fa-solid fa-plus"></i> Crear Usuario</button>
       </div>
 
       <div class="panel admin-tab oculto" data-tab="obras">
-        <h2>Obras</h2>
-        <table><thead><tr><th>Nombre</th><th>Dirección</th><th>Estado</th></tr></thead>
-          <tbody id="tabla-obras"></tbody></table>
-        <h3 style="margin-top:22px;font-size:16px;">Nueva obra</h3>
-        <div class="campo"><label>Nombre</label><input id="obra-nombre"></div>
-        <div class="campo"><label>Dirección</label><input id="obra-direccion"></div>
-        <button class="btn btn-oscuro" id="btn-crear-obra" style="width:auto;padding:10px 18px;">Crear obra</button>
+        <h2><i class="fa-solid fa-building-user"></i> Gestión de Obras</h2>
+        <div class="table-responsive">
+          <table>
+            <thead><tr><th>Nombre</th><th>Dirección</th><th>Estado</th></tr></thead>
+            <tbody id="tabla-obras"></tbody>
+          </table>
+        </div>
+        
+        <h3 style="margin-top:28px; font-size:15px; color:var(--neon-cyan);"><i class="fa-solid fa-folder-plus"></i> Nueva Obra</h3>
+        <div class="campo"><label>Nombre de la Obra</label><input id="obra-nombre"></div>
+        <div class="campo"><label>Dirección completa</label><input id="obra-direccion"></div>
+        <button class="btn btn-oscuro" id="btn-crear-obra" style="width:auto;"><i class="fa-solid fa-plus"></i> Crear Obra</button>
 
-        <h3 style="margin-top:22px;font-size:16px;">Asignar obra a empleado</h3>
+        <h3 style="margin-top:28px; font-size:15px; color:var(--neon-cyan);"><i class="fa-solid fa-link"></i> Asignar obra a empleado</h3>
         <div class="campo"><label>Empleado</label><select id="asignar-empleado"></select></div>
         <div class="campo"><label>Obra</label><select id="asignar-obra"></select></div>
-        <button class="btn btn-oscuro" id="btn-asignar-obra" style="width:auto;padding:10px 18px;">Asignar</button>
+        <button class="btn btn-oscuro" id="btn-asignar-obra" style="width:auto;"><i class="fa-solid fa-check"></i> Asignar</button>
       </div>
 
       <div class="panel admin-tab oculto" data-tab="correcciones">
-        <h2>Solicitudes de corrección pendientes</h2>
-        <table><thead><tr><th>Empleado</th><th>Fecha</th><th>Tipo</th><th>Motivo</th><th>Acción</th></tr></thead>
-          <tbody id="tabla-correcciones"></tbody></table>
+        <h2><i class="fa-solid fa-clock-rotate-left"></i> Solicitudes de corrección pendientes</h2>
+        <div class="table-responsive">
+          <table>
+            <thead><tr><th>Empleado</th><th>Fecha</th><th>Tipo</th><th>Motivo</th><th>Acción</th></tr></thead>
+            <tbody id="tabla-correcciones"></tbody>
+          </table>
+        </div>
       </div>
 
       <div class="panel admin-tab oculto" data-tab="informes">
-        <h2>Informe mensual (PDF)</h2>
+        <h2><i class="fa-solid fa-file-invoice"></i> Generar Informe Mensual (PDF)</h2>
         <div class="campo"><label>Empleado</label><select id="informe-empleado"></select></div>
         <div class="campo"><label>Mes</label><input type="number" min="1" max="12" id="informe-mes"></div>
         <div class="campo"><label>Año</label><input type="number" id="informe-anio"></div>
-        <button class="btn btn-primario" id="btn-descargar-pdf" style="width:auto;padding:10px 18px;">Descargar PDF</button>
+        <button class="btn btn-primario" id="btn-descargar-pdf" style="width:auto;"><i class="fa-solid fa-file-arrow-down"></i> Descargar Reporte PDF</button>
       </div>
 
       <div class="panel admin-tab oculto" data-tab="auditoria">
-        <h2>Registro de auditoría</h2>
-        <table><thead><tr><th>Fecha</th><th>Actor</th><th>Rol</th><th>Acción</th><th>Detalle</th></tr></thead>
-          <tbody id="tabla-auditoria"></tbody></table>
+        <h2>
+          <span><i class="fa-solid fa-box-archive"></i> Registro de Auditoría</span>
+          <button class="btn btn-borde" style="width:auto; padding:4px 10px; font-size:11px;" onclick="exportarTablaCSV('tabla-auditoria', 'auditoria.csv')"><i class="fa-solid fa-download"></i> Exportar CSV</button>
+        </h2>
+        <input type="text" id="filter-auditoria" class="search-bar" placeholder="🔎 Filtrar eventos o usuarios..." onkeyup="filtrarTabla('filter-auditoria', 'tabla-auditoria')">
+        <div class="table-responsive">
+          <table>
+            <thead><tr><th>Fecha</th><th>Actor</th><th>Rol</th><th>Acción</th><th>Detalle</th></tr></thead>
+            <tbody id="tabla-auditoria"></tbody>
+          </table>
+        </div>
       </div>
     </section>
 
-    <!-- ---- NOTIFICACIONES (compartido) ---- -->
     <section id="vista-notificaciones" class="seccion-vista">
       <div class="panel">
-        <h2>Notificaciones</h2>
+        <h2>
+          <span><i class="fa-solid fa-bell" style="color:var(--neon-cyan)"></i> Notificaciones</span>
+          <button class="btn btn-borde" id="btn-volver-notif" style="width:auto; padding:6px 14px; font-size:12px;">
+            <i class="fa-solid fa-arrow-left"></i> Volver
+          </button>
+        </h2>
         <div class="lista-notif" id="lista-notificaciones"></div>
       </div>
     </section>
@@ -249,23 +604,28 @@
   </main>
 
   <footer class="tabbar">
-    <button class="tab-inferior activo" data-vista="empleado">Fichaje</button>
-    <button class="tab-inferior oculto" data-vista="admin" id="tab-admin">Admin</button>
-    <button class="tab-inferior" data-vista="notificaciones">Notificaciones</button>
+    <button class="tab-inferior activo" data-vista="empleado"><i class="fa-solid fa-user-clock"></i>Fichaje</button>
+    <button class="tab-inferior oculto" data-vista="admin" id="tab-admin"><i class="fa-solid fa-user-shield"></i>Admin</button>
+    <button class="tab-inferior" data-vista="notificaciones"><i class="fa-solid fa-bell"></i>Notif</button>
   </footer>
 </div>
 
 <script>
-/* =======================================================================
-   CONFIGURA AQUÍ LA URL DE TU DESPLIEGUE DE GOOGLE APPS SCRIPT
-   (Implementar > Nueva implementación > Aplicación web > Acceso: Cualquiera)
-   ======================================================================= */
 const API_URL = 'https://script.google.com/macros/s/AKfycbxxc_tXI2gFx7zkQgmgP5sLR5rnio2ZijODWNw7JNPWvbrRu5JENpudkbGIX_X4VS-g/exec';
 
 let estadoApp = { token: null, rol: null, nombre: null, empleadoId: null };
+let ultimaVista = 'empleado'; // Para el botón de volver de notificaciones
 
-// --- Llamada genérica a la API ---
-// Content-Type text/plain evita el preflight CORS que Apps Script no gestiona.
+// Real-Time Clock Header
+setInterval(() => {
+  const clockEl = document.getElementById('clock-time');
+  if (clockEl) {
+    const now = new Date();
+    clockEl.textContent = now.toLocaleTimeString('es-ES');
+  }
+}, 1000);
+
+// Generic API caller
 async function api(action, extra) {
   const cuerpo = Object.assign({ action: action, token: estadoApp.token }, extra || {});
   const resp = await fetch(API_URL, {
@@ -296,8 +656,7 @@ function mostrarError(id, mensaje) {
   setTimeout(() => el.classList.add('oculto'), 5000);
 }
 
-// --- LOGIN ---
-document.getElementById('btn-login').addEventListener('click', async () => {
+async function ejecutarLogin() {
   const usuario = document.getElementById('input-usuario').value.trim();
   const password = document.getElementById('input-password').value;
   try {
@@ -308,6 +667,17 @@ document.getElementById('btn-login').addEventListener('click', async () => {
   } catch (e) {
     mostrarError('error-login', e.message);
   }
+}
+
+document.getElementById('btn-login').addEventListener('click', ejecutarLogin);
+
+// Enter Key listeners for Login inputs
+['input-usuario', 'input-password'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      ejecutarLogin();
+    }
+  });
 });
 
 async function apiSinToken(action, extra) {
@@ -327,7 +697,7 @@ document.getElementById('btn-salir-sesion').addEventListener('click', async () =
   location.reload();
 });
 
-// --- Restaurar sesión ---
+// Restore session
 (function restaurar() {
   const guardada = sessionStorage.getItem('sesionFichajes');
   if (guardada) { estadoApp = JSON.parse(guardada); arrancarApp(); }
@@ -342,18 +712,31 @@ function arrancarApp() {
   setInterval(cargarNotificaciones, 30000);
 }
 
-// --- Navegación inferior ---
 document.querySelectorAll('.tab-inferior').forEach(btn => {
   btn.addEventListener('click', () => cambiarVista(btn.dataset.vista));
 });
+
 function cambiarVista(nombre) {
+  // Store previous view if not entering notifications
+  const currentVisible = document.querySelector('.seccion-vista.visible');
+  if (currentVisible && currentVisible.id !== 'vista-notificaciones') {
+    ultimaVista = currentVisible.id.replace('vista-', '');
+  }
+
   document.querySelectorAll('.seccion-vista').forEach(s => s.classList.remove('visible'));
   document.getElementById('vista-' + nombre).classList.add('visible');
   document.querySelectorAll('.tab-inferior').forEach(b => b.classList.toggle('activo', b.dataset.vista === nombre));
+  
   if (nombre === 'admin') cargarAdmin();
   if (nombre === 'notificaciones') cargarNotificaciones(true);
 }
+
 document.getElementById('btn-campana').addEventListener('click', () => cambiarVista('notificaciones'));
+
+// Back Button Handler for Notifications
+document.getElementById('btn-volver-notif').addEventListener('click', () => {
+  cambiarVista(ultimaVista || (estadoApp.rol === 'admin' ? 'admin' : 'empleado'));
+});
 
 function cargarTodo() {
   cargarResumenHoy();
@@ -363,10 +746,9 @@ function cargarTodo() {
   if (estadoApp.rol === 'admin') cargarAdmin();
 }
 
-// --- FICHAJE ---
 document.querySelectorAll('.btn-fichar').forEach(btn => {
   btn.addEventListener('click', async () => {
-    document.querySelectorAll('.btn-fichar').forEach(b => b.disabled = true); // evita doble clic mientras se procesa
+    document.querySelectorAll('.btn-fichar').forEach(b => b.disabled = true);
     try {
       const ubicacion = await obtenerUbicacion();
       const resumen = await api('fichar', { tipo: btn.dataset.tipo, lat: ubicacion.lat, lng: ubicacion.lng, precision: ubicacion.precision });
@@ -412,15 +794,15 @@ function actualizarBotonesSegunEstado() {
   });
 }
 
-// --- MI OBRA ---
+// Assigned Work Construction Site
 async function cargarMiObra() {
   const obra = await api('miObra');
   document.getElementById('contenido-mi-obra').innerHTML = obra
-    ? `<b>${obra.nombre}</b><br><span style="color:var(--acero)">${obra.direccion || ''}</span><br><span class="estado-pill estado-TRABAJANDO" style="margin-top:8px;">${obra.estado}</span>`
+    ? `<b>${obra.nombre}</b><br><span style="color:var(--text-muted)">${obra.direccion || ''}</span><br><span class="estado-pill estado-TRABAJANDO" style="margin-top:10px;">${obra.estado}</span>`
     : 'Sin obra asignada todavía.';
 }
 
-// --- CORRECCIONES (empleado) ---
+// Employee Schedule Correction Requests
 document.getElementById('btn-enviar-correccion').addEventListener('click', async () => {
   const fecha = document.getElementById('corr-fecha').value;
   const tipoSolicitado = document.getElementById('corr-tipo').value;
@@ -437,11 +819,11 @@ document.getElementById('btn-enviar-correccion').addEventListener('click', async
 async function cargarMisCorrecciones() {
   const filas = await api('misCorrecciones');
   document.getElementById('tabla-mis-correcciones').innerHTML = filas.map(f =>
-    `<tr><td>${f.fecha}</td><td>${etiquetaVisual(f.tipoSolicitado)}</td><td>${f.estado}</td></tr>`
+    `<tr><td>${f.fecha}</td><td>${etiquetaVisual(f.tipoSolicitado)}</td><td><span class="estado-pill">${f.estado}</span></td></tr>`
   ).join('') || '<tr><td colspan="3">Sin solicitudes</td></tr>';
 }
 
-// --- NOTIFICACIONES ---
+// Notifications
 async function cargarNotificaciones(marcarVistoEnUI) {
   const notifs = await api('misNotificaciones');
   const noLeidas = notifs.filter(n => !n.leida).length;
@@ -450,7 +832,7 @@ async function cargarNotificaciones(marcarVistoEnUI) {
   badge.classList.toggle('oculto', noLeidas === 0);
   document.getElementById('lista-notificaciones').innerHTML = notifs.map(n =>
     `<div class="notif ${n.leida ? '' : 'no-leida'}" data-id="${n.id}"><b>${n.titulo}</b>${n.mensaje}<br><small>${new Date(n.fecha).toLocaleString('es-ES')}</small></div>`
-  ).join('') || '<p>No tienes notificaciones.</p>';
+  ).join('') || '<p style="color:var(--text-muted)">No tienes notificaciones.</p>';
 
   document.querySelectorAll('#lista-notificaciones .notif.no-leida').forEach(el => {
     el.addEventListener('click', async () => {
@@ -461,7 +843,6 @@ async function cargarNotificaciones(marcarVistoEnUI) {
   });
 }
 
-// --- ADMIN ---
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('activo'));
@@ -483,7 +864,7 @@ async function cargarAdmin() {
   ).join('');
 
   document.getElementById('tabla-obras').innerHTML = obras.map(o =>
-    `<tr><td>${o.nombre}</td><td>${o.direccion || ''}</td><td>${o.estado}</td></tr>`
+    `<tr><td>${o.nombre}</td><td>${o.direccion || ''}</td><td><span class="estado-pill">${o.estado}</span></td></tr>`
   ).join('') || '<tr><td colspan="3">Sin obras creadas</td></tr>';
 
   const opcionesEmpleados = empleados.filter(e => e.rol === 'empleado').map(e => `<option value="${e.id}">${e.nombre}</option>`).join('');
@@ -493,8 +874,8 @@ async function cargarAdmin() {
 
   document.getElementById('tabla-correcciones').innerHTML = correcciones.map(c =>
     `<tr><td>${mapaEmpleados[c.empleadoId]?.nombre || c.empleadoId}</td><td>${c.fecha}</td><td>${etiquetaVisual(c.tipoSolicitado)} → ${c.horaSolicitada}</td><td>${c.motivo}</td>
-     <td><button class="btn btn-primario" style="width:auto;padding:6px 10px;display:inline-block;" onclick="resolverCorreccion('${c.id}', true)">Aprobar</button>
-     <button class="btn btn-borde" style="width:auto;padding:6px 10px;display:inline-block;margin-left:6px;" onclick="resolverCorreccion('${c.id}', false)">Rechazar</button></td></tr>`
+     <td><button class="btn btn-primario" style="width:auto;padding:4px 10px;font-size:12px;display:inline-block;" onclick="resolverCorreccion('${c.id}', true)">Aprobar</button>
+     <button class="btn btn-borde" style="width:auto;padding:4px 10px;font-size:12px;display:inline-block;margin-left:6px;" onclick="resolverCorreccion('${c.id}', false)">Rechazar</button></td></tr>`
   ).join('') || '<tr><td colspan="5">No hay solicitudes pendientes</td></tr>';
 
   const hoy = new Date();
@@ -554,6 +935,32 @@ document.getElementById('btn-descargar-pdf').addEventListener('click', async () 
   document.body.appendChild(a); a.click(); a.remove();
   URL.revokeObjectURL(url);
 });
+
+function filtrarTabla(inputId, tablaId) {
+  const query = document.getElementById(inputId).value.toLowerCase();
+  const rows = document.querySelectorAll(`#${tablaId} tr`);
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(query) ? '' : 'none';
+  });
+}
+function exportarTablaCSV(tablaId, filename) {
+  const rows = document.querySelectorAll(`#${tablaId} tr`);
+  let csv = [];
+  rows.forEach(row => {
+    const cols = row.querySelectorAll('td, th');
+    let rowData = [];
+    cols.forEach(col => rowData.push('"' + col.innerText.replace(/"/g, '""') + '"'));
+    csv.push(rowData.join(','));
+  });
+  const csvBlob = new Blob([csv.join('\n')], { type: 'text/csv' });
+  const url = URL.createObjectURL(csvBlob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 </script>
 </body>
 </html>
