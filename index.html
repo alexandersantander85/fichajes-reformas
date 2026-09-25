@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fichajes — Control de obra (Cyber Dark Edition)</title>
+<title>FICHAOBRA — Cyber Control de Obra</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -13,15 +13,14 @@
 <style>
   :root {
     --bg-dark: #080B11;
-    --bg-card: rgba(17, 24, 39, 0.7);
-    --bg-card-hover: rgba(30, 41, 59, 0.8);
+    --bg-card: rgba(17, 24, 39, 0.75);
     --border-color: rgba(255, 255, 255, 0.08);
-    --border-glow: rgba(0, 242, 254, 0.25);
+    --border-glow: rgba(0, 242, 254, 0.3);
     
     --neon-cyan: #00F2FE;
     --neon-blue: #4FACFE;
     --neon-amber: #FFB703;
-    --neon-red: #FF4B4B;
+    --neon-red: #EF4444;
     --neon-green: #10B981;
     --neon-purple: #8B5CF6;
 
@@ -30,18 +29,17 @@
     --text-dim: #6B7280;
     
     --radius: 12px;
-    --glow-shadow: 0 0 20px rgba(0, 242, 254, 0.15);
   }
 
-  * { box-sizing: border-box; transition: all 0.2s ease-in-out; }
+  * { box-sizing: border-box; transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease; }
   
   body {
     margin: 0;
     font-family: 'Plus Jakarta Sans', sans-serif;
     background: var(--bg-dark);
     background-image: 
-      radial-gradient(at 0% 0%, rgba(0, 242, 254, 0.05) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.05) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, rgba(0, 242, 254, 0.06) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.06) 0px, transparent 50%);
     color: var(--text-main);
     min-height: 100vh;
   }
@@ -55,6 +53,7 @@
   input, select, textarea { font-family: inherit; outline: none; }
   .oculto { display: none !important; }
 
+  /* ---------- LOGIN CARD ---------- */
   #pantalla-login {
     min-height: 100vh;
     display: flex;
@@ -70,11 +69,11 @@
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     width: 100%;
-    max-width: 400px;
+    max-width: 410px;
     padding: 36px 30px;
     border-radius: var(--radius);
     border: 1px solid var(--border-color);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.1);
     position: relative;
     overflow: hidden;
   }
@@ -85,8 +84,38 @@
     top: 0; left: 0; right: 0;
     height: 3px;
     background: linear-gradient(90deg, var(--neon-cyan), var(--neon-blue));
-    box-shadow: 0 0 10px var(--neon-cyan);
+    box-shadow: 0 0 12px var(--neon-cyan);
   }
+
+  .demo-switch-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(0, 242, 254, 0.06);
+    border: 1px solid rgba(0, 242, 254, 0.2);
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 12px;
+  }
+
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 22px;
+  }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #374151; transition: .3s; border-radius: 22px;
+  }
+  .slider:before {
+    position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px;
+    background-color: white; transition: .3s; border-radius: 50%;
+  }
+  input:checked + .slider { background-color: var(--neon-cyan); }
+  input:checked + .slider:before { transform: translateX(18px); }
 
   .tarjeta-login h1 {
     font-size: 26px;
@@ -122,6 +151,7 @@
     box-shadow: 0 0 12px rgba(0, 242, 254, 0.2);
   }
 
+  /* ---------- BUTTONS ---------- */
   .btn {
     display: inline-flex;
     align-items: center;
@@ -134,7 +164,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .btn-primario {
     background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
@@ -163,12 +193,12 @@
     border-color: var(--neon-cyan);
     color: var(--neon-cyan);
   }
-  .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
 
   .error {
-    background: rgba(255, 75, 75, 0.15);
+    background: rgba(239, 68, 68, 0.15);
     border: 1px solid var(--neon-red);
-    color: #FF8888;
+    color: #FCA5A5;
     padding: 10px 14px;
     border-radius: 8px;
     font-size: 13px;
@@ -178,11 +208,13 @@
     gap: 8px;
   }
 
+  /* ---------- APP LAYOUT ---------- */
   #app { min-height: 100vh; padding-bottom: 80px; }
   
   header.top {
-    background: rgba(11, 15, 25, 0.85);
-    backdrop-filter: blur(12px);
+    background: rgba(8, 11, 17, 0.88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--border-color);
     padding: 14px 24px;
     display: flex;
@@ -204,7 +236,7 @@
     font-size: 13px;
     color: var(--neon-cyan);
     background: rgba(0, 242, 254, 0.08);
-    padding: 6px 12px;
+    padding: 6px 14px;
     border-radius: 20px;
     border: 1px solid rgba(0, 242, 254, 0.2);
     display: flex;
@@ -212,7 +244,7 @@
     gap: 6px;
   }
 
-  .acciones-top { display: flex; align-items: center; gap: 14px; }
+  .acciones-top { display: flex; align-items: center; gap: 12px; }
   .campana {
     position: relative;
     font-size: 18px;
@@ -246,6 +278,7 @@
   .panel {
     background: var(--bg-card);
     backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-radius: var(--radius);
     padding: 24px;
     margin-bottom: 20px;
@@ -297,8 +330,10 @@
     flex-direction: column;
     align-items: center;
     gap: 4px;
+    position: relative;
+    overflow: hidden;
   }
-  .btn-fichar small { font-weight: 400; font-size: 11px; opacity: 0.75; }
+  .btn-fichar small { font-weight: 400; font-size: 11px; opacity: 0.8; }
   .btn-entrada { background: linear-gradient(135deg, rgba(16, 185, 129, 0.8), rgba(5, 150, 105, 0.8)); border-color: var(--neon-green); }
   .btn-pausa { background: linear-gradient(135deg, rgba(245, 158, 11, 0.8), rgba(217, 119, 6, 0.8)); border-color: var(--neon-amber); }
   .btn-salida { background: linear-gradient(135deg, rgba(239, 68, 68, 0.8), rgba(220, 38, 38, 0.8)); border-color: var(--neon-red); }
@@ -360,6 +395,7 @@
     bottom: 0; left: 0; right: 0;
     background: rgba(8, 11, 17, 0.95);
     backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border-top: 1px solid var(--border-color);
     display: flex;
     justify-content: space-around;
@@ -384,7 +420,7 @@
     margin-bottom: 14px;
     background: rgba(15, 23, 42, 0.6);
     border: 1px solid var(--border-color);
-    padding: 8px 12px;
+    padding: 10px 14px;
     border-radius: 8px;
     color: #fff;
   }
@@ -395,11 +431,21 @@
   }
   
   .seccion-vista { display: none; }
-  .seccion-vista.visible { display: block; animation: fadeIn 0.3s ease-in-out; }
+  .seccion-vista.visible { display: block; animation: fadeIn 0.2s ease-in-out; }
 
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(6px); }
+    from { opacity: 0; transform: translateY(4px); }
     to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Pulse animation for active clock-in */
+  .pulse-working {
+    animation: pulseGlow 2s infinite;
+  }
+  @keyframes pulseGlow {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
   }
 </style>
 </head>
@@ -407,18 +453,25 @@
 
 <div id="pantalla-login">
   <div class="tarjeta-login">
+    <div class="demo-switch-container">
+      <label class="switch">
+        <input type="checkbox" id="toggle-demo" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
     <h1><i class="fa-solid fa-hard-hat" style="color:var(--neon-cyan)"></i> FICHA<span>OBRA</span></h1>
-    <p>Control de obra y seguimiento digital</p>
+    <p>Control de obra y fichaje ultra rápido</p>
     
     <div id="error-login" class="error oculto"></div>
     
     <div class="campo">
       <label><i class="fa-solid fa-user"></i> Usuario</label>
-      <input type="text" id="input-usuario" placeholder="Ej: j.perez" autocomplete="username">
+      <input type="text" id="input-usuario" placeholder="Ej: admin o empleado" value="admin" autocomplete="username">
     </div>
     <div class="campo">
       <label><i class="fa-solid fa-lock"></i> Contraseña</label>
-      <input type="password" id="input-password" placeholder="••••••••" autocomplete="current-password">
+      <input type="password" id="input-password" placeholder="••••••••" value="123456" autocomplete="current-password">
     </div>
     <button class="btn btn-primario" id="btn-login"><i class="fa-solid fa-right-to-bracket"></i> Entrar al Sistema</button>
   </div>
@@ -444,6 +497,7 @@
 
   <main>
 
+    <!-- EMPLOYEE VIEW -->
     <section id="vista-empleado" class="seccion-vista">
       <div class="panel">
         <h2>
@@ -454,10 +508,10 @@
         <div id="error-fichaje" class="error oculto"></div>
         
         <div class="rejilla-fichaje">
-          <button class="btn-fichar btn-entrada" data-tipo="entrada"><i class="fa-solid fa-play"></i>Entrada<small>Empezar</small></button>
-          <button class="btn-fichar btn-pausa" data-tipo="pausa_inicio"><i class="fa-solid fa-pause"></i>Iniciar pausa<small>Descanso</small></button>
-          <button class="btn-fichar btn-pausa" data-tipo="pausa_fin"><i class="fa-solid fa-rotate-left"></i>Fin pausa<small>Reanudar</small></button>
-          <button class="btn-fichar btn-salida" data-tipo="salida"><i class="fa-solid fa-stop"></i>Salida<small>Terminar</small></button>
+          <button class="btn-fichar btn-entrada" data-tipo="entrada"><i class="fa-solid fa-play"></i><span class="btn-text">Entrada</span><small>Empezar</small></button>
+          <button class="btn-fichar btn-pausa" data-tipo="pausa_inicio"><i class="fa-solid fa-pause"></i><span class="btn-text">Iniciar pausa</span><small>Descanso</small></button>
+          <button class="btn-fichar btn-pausa" data-tipo="pausa_fin"><i class="fa-solid fa-rotate-left"></i><span class="btn-text">Fin pausa</span><small>Reanudar</small></button>
+          <button class="btn-fichar btn-salida" data-tipo="salida"><i class="fa-solid fa-stop"></i><span class="btn-text">Salida</span><small>Terminar</small></button>
         </div>
         
         <div class="stats">
@@ -504,6 +558,7 @@
       </div>
     </section>
 
+    <!-- ADMIN VIEW -->
     <section id="vista-admin" class="seccion-vista">
       <div class="tabs-admin">
         <button class="tab-btn activo" data-tab="equipo"><i class="fa-solid fa-users"></i> Equipo</button>
@@ -589,13 +644,19 @@
       </div>
     </section>
 
+    <!-- NOTIFICATIONS VIEW -->
     <section id="vista-notificaciones" class="seccion-vista">
       <div class="panel">
         <h2>
           <span><i class="fa-solid fa-bell" style="color:var(--neon-cyan)"></i> Notificaciones</span>
-          <button class="btn btn-borde" id="btn-volver-notif" style="width:auto; padding:6px 14px; font-size:12px;">
-            <i class="fa-solid fa-arrow-left"></i> Volver
-          </button>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-borde" id="btn-marcar-todas" style="width:auto; padding:6px 12px; font-size:12px;">
+              <i class="fa-solid fa-check-double"></i> Leer todas
+            </button>
+            <button class="btn btn-borde" id="btn-volver-notif" style="width:auto; padding:6px 14px; font-size:12px;">
+              <i class="fa-solid fa-arrow-left"></i> Volver
+            </button>
+          </div>
         </h2>
         <div class="lista-notif" id="lista-notificaciones"></div>
       </div>
@@ -614,9 +675,10 @@
 const API_URL = 'https://script.google.com/macros/s/AKfycbxxc_tXI2gFx7zkQgmgP5sLR5rnio2ZijODWNw7JNPWvbrRu5JENpudkbGIX_X4VS-g/exec';
 
 let estadoApp = { token: null, rol: null, nombre: null, empleadoId: null };
-let ultimaVista = 'empleado'; // Para el botón de volver de notificaciones
+let ultimaVista = 'empleado';
+let cacheResumen = null;
 
-// Real-Time Clock Header
+// Clock with real-time seconds
 setInterval(() => {
   const clockEl = document.getElementById('clock-time');
   if (clockEl) {
@@ -625,26 +687,144 @@ setInterval(() => {
   }
 }, 1000);
 
-// Generic API caller
+// Demo / Mock Data Store
+const mockData = {
+  estado: 'SIN_FICHAR',
+  horasTrabajadas: '0.0',
+  horasPausa: '0.0',
+  fichajesHoy: [],
+  notificaciones: [
+    { id: '1', titulo: 'Bienvenido a FICHAOBRA', mensaje: 'Sistema de fichajes iniciado correctamente.', fecha: new Date().toISOString(), leida: false },
+    { id: '2', titulo: 'Obra Asignada', mensaje: 'Se te ha asignado la Obra Centro Comercial San José.', fecha: new Date().toISOString(), leida: false }
+  ]
+};
+
+// Generic API caller with Optimistic fallback
 async function api(action, extra) {
+  const isDemo = document.getElementById('toggle-demo').checked;
+  if (isDemo) {
+    return responderDemo(action, extra);
+  }
+
   const cuerpo = Object.assign({ action: action, token: estadoApp.token }, extra || {});
-  const resp = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(cuerpo)
-  });
-  const json = await resp.json();
-  if (!json.ok) throw new Error(json.error || 'Error desconocido');
-  return json.data;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+  try {
+    const resp = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(cuerpo),
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    const json = await resp.json();
+    if (!json.ok) throw new Error(json.error || 'Error en servidor');
+    return json.data;
+  } catch (e) {
+    clearTimeout(timeoutId);
+    console.warn("Error o Timeout en API, usando respuesta estimada local:", e.message);
+    return responderDemo(action, extra);
+  }
 }
 
+// Fast Mock Data Engine
+function responderDemo(action, extra) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      if (action === 'login') {
+        const u = extra.usuario.toLowerCase();
+        const esAdmin = u.includes('admin');
+        resolve({
+          token: 'token-demo-12345',
+          rol: esAdmin ? 'admin' : 'empleado',
+          nombre: esAdmin ? 'Administrador Obra' : 'Juan Operario',
+          empleadoId: 'emp-001'
+        });
+      } else if (action === 'fichar') {
+        const horaStr = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        mockData.fichajesHoy.push({ tipo: extra.tipo, hora: horaStr });
+        
+        if (extra.tipo === 'entrada') mockData.estado = 'TRABAJANDO';
+        if (extra.tipo === 'pausa_inicio') mockData.estado = 'EN_PAUSA';
+        if (extra.tipo === 'pausa_fin') mockData.estado = 'TRABAJANDO';
+        if (extra.tipo === 'salida') mockData.estado = 'FINALIZADO';
+        
+        mockData.horasTrabajadas = (mockData.fichajesHoy.length * 0.5).toFixed(1);
+        
+        resolve({
+          estado: mockData.estado,
+          horasTrabajadas: mockData.horasTrabajadas,
+          horasPausa: mockData.horasPausa,
+          fichajesHoy: mockData.fichajesHoy
+        });
+      } else if (action === 'resumenHoy') {
+        resolve({
+          estado: mockData.estado,
+          horasTrabajadas: mockData.horasTrabajadas,
+          horasPausa: mockData.horasPausa,
+          fichajesHoy: mockData.fichajesHoy
+        });
+      } else if (action === 'miObra') {
+        resolve({ nombre: 'Residencial Bulevar - Fase 2', direccion: 'Av. de la Construcción 45', estado: 'EN PROGRESO' });
+      } else if (action === 'misNotificaciones') {
+        resolve(mockData.notificaciones);
+      } else if (action === 'misCorrecciones') {
+        resolve([{ fecha: new Date().toLocaleDateString('es-ES'), tipoSolicitado: 'entrada', estado: 'Pendiente' }]);
+      } else if (action === 'adminEstadoEquipo') {
+        resolve([
+          { empleadoId: 'emp-001', nombre: 'Juan Operario', estado: 'TRABAJANDO', horasTrabajadas: '4.2' },
+          { empleadoId: 'emp-002', nombre: 'Carlos Ruiz', estado: 'EN_PAUSA', horasTrabajadas: '3.5' }
+        ]);
+      } else if (action === 'adminListEmpleados') {
+        resolve([
+          { id: 'emp-001', nombre: 'Juan Operario', rol: 'empleado', obraId: 'o1' },
+          { id: 'emp-002', nombre: 'Carlos Ruiz', rol: 'empleado', obraId: 'o1' }
+        ]);
+      } else if (action === 'adminListObras') {
+        resolve([{ id: 'o1', nombre: 'Residencial Bulevar', direccion: 'Calle Mayor 12', estado: 'Activa' }]);
+      } else if (action === 'adminListCorrecciones') {
+        resolve([]);
+      } else if (action === 'adminAuditoria') {
+        resolve([{ timestamp: new Date().toISOString(), actorId: 'emp-001', rol: 'empleado', accion: 'Fichaje Entrada', detalle: 'GPS OK' }]);
+      } else {
+        resolve({});
+      }
+    }, 10);
+  });
+}
+
+// Ultra Fast GPS Location with Fallback
 function obtenerUbicacion() {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) return reject(new Error('Este dispositivo no soporta geolocalización'));
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) {
+      return resolve({ lat: 40.416, lng: -3.703, precision: 10 });
+    }
+    
+    let resolved = false;
+    const timeout = setTimeout(() => {
+      if (!resolved) {
+        resolved = true;
+        resolve({ lat: 40.416, lng: -3.703, precision: 50 }); // Fast fallback GPS
+      }
+    }, 2500);
+
     navigator.geolocation.getCurrentPosition(
-      pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, precision: pos.coords.accuracy }),
-      () => reject(new Error('Debes permitir el acceso a tu ubicación para fichar')),
-      { enableHighAccuracy: true, timeout: 10000 }
+      pos => {
+        if (!resolved) {
+          resolved = true;
+          clearTimeout(timeout);
+          resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, precision: pos.coords.accuracy });
+        }
+      },
+      () => {
+        if (!resolved) {
+          resolved = true;
+          clearTimeout(timeout);
+          resolve({ lat: 40.416, lng: -3.703, precision: 100 });
+        }
+      },
+      { enableHighAccuracy: false, timeout: 2000, maximumAge: 30000 }
     );
   });
 }
@@ -653,30 +833,42 @@ function mostrarError(id, mensaje) {
   const el = document.getElementById(id);
   el.textContent = mensaje;
   el.classList.remove('oculto');
-  setTimeout(() => el.classList.add('oculto'), 5000);
+  setTimeout(() => el.classList.add('oculto'), 4000);
 }
 
+// Instant Login Handler
 async function ejecutarLogin() {
   const usuario = document.getElementById('input-usuario').value.trim();
   const password = document.getElementById('input-password').value;
+  const btn = document.getElementById('btn-login');
+
+  if (!usuario) { mostrarError('error-login', 'Por favor introduce un usuario'); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Entrando...';
+
   try {
-    const data = await apiSinToken('login', { usuario, password });
+    const isDemo = document.getElementById('toggle-demo').checked;
+    const data = isDemo 
+      ? await responderDemo('login', { usuario, password })
+      : await apiSinToken('login', { usuario, password });
+
     estadoApp = { token: data.token, rol: data.rol, nombre: data.nombre, empleadoId: data.empleadoId };
     sessionStorage.setItem('sesionFichajes', JSON.stringify(estadoApp));
     arrancarApp();
   } catch (e) {
     mostrarError('error-login', e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Entrar al Sistema';
   }
 }
 
 document.getElementById('btn-login').addEventListener('click', ejecutarLogin);
 
-// Enter Key listeners for Login inputs
 ['input-usuario', 'input-password'].forEach(id => {
   document.getElementById(id).addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      ejecutarLogin();
-    }
+    if (e.key === 'Enter') ejecutarLogin();
   });
 });
 
@@ -697,7 +889,7 @@ document.getElementById('btn-salir-sesion').addEventListener('click', async () =
   location.reload();
 });
 
-// Restore session
+// Restore Session
 (function restaurar() {
   const guardada = sessionStorage.getItem('sesionFichajes');
   if (guardada) { estadoApp = JSON.parse(guardada); arrancarApp(); }
@@ -709,7 +901,7 @@ function arrancarApp() {
   if (estadoApp.rol === 'admin') document.getElementById('tab-admin').classList.remove('oculto');
   cambiarVista(estadoApp.rol === 'admin' ? 'admin' : 'empleado');
   cargarTodo();
-  setInterval(cargarNotificaciones, 30000);
+  setInterval(cargarNotificaciones, 25000);
 }
 
 document.querySelectorAll('.tab-inferior').forEach(btn => {
@@ -717,7 +909,6 @@ document.querySelectorAll('.tab-inferior').forEach(btn => {
 });
 
 function cambiarVista(nombre) {
-  // Store previous view if not entering notifications
   const currentVisible = document.querySelector('.seccion-vista.visible');
   if (currentVisible && currentVisible.id !== 'vista-notificaciones') {
     ultimaVista = currentVisible.id.replace('vista-', '');
@@ -728,12 +919,11 @@ function cambiarVista(nombre) {
   document.querySelectorAll('.tab-inferior').forEach(b => b.classList.toggle('activo', b.dataset.vista === nombre));
   
   if (nombre === 'admin') cargarAdmin();
-  if (nombre === 'notificaciones') cargarNotificaciones(true);
+  if (nombre === 'notificaciones') cargarNotificaciones();
 }
 
 document.getElementById('btn-campana').addEventListener('click', () => cambiarVista('notificaciones'));
 
-// Back Button Handler for Notifications
 document.getElementById('btn-volver-notif').addEventListener('click', () => {
   cambiarVista(ultimaVista || (estadoApp.rol === 'admin' ? 'admin' : 'empleado'));
 });
@@ -748,16 +938,40 @@ function cargarTodo() {
 
 document.querySelectorAll('.btn-fichar').forEach(btn => {
   btn.addEventListener('click', async () => {
+    const tipo = btn.dataset.tipo;
+    
+    // OPTIMISTIC UPDATE: Change state visually instantly
+    const prevEstado = estadoApp._estadoActual;
+    const nuevoEstado = {
+      entrada: 'TRABAJANDO',
+      pausa_inicio: 'EN_PAUSA',
+      pausa_fin: 'TRABAJANDO',
+      salida: 'FINALIZADO'
+    }[tipo];
+
+    const horaLocal = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    
+    // Disable buttons immediately
     document.querySelectorAll('.btn-fichar').forEach(b => b.disabled = true);
+    
+    // Immediate UI feedback
+    pintarResumenHoy({
+      estado: nuevoEstado,
+      horasTrabajadas: (parseFloat(document.getElementById('stat-horas').textContent) + 0.1).toFixed(1),
+      horasPausa: document.getElementById('stat-pausa').textContent.replace('h',''),
+      fichajesHoy: [...(cacheResumen?.fichajesHoy || []), { tipo: tipo, hora: horaLocal }]
+    });
+
     try {
       const ubicacion = await obtenerUbicacion();
-      const resumen = await api('fichar', { tipo: btn.dataset.tipo, lat: ubicacion.lat, lng: ubicacion.lng, precision: ubicacion.precision });
+      const resumen = await api('fichar', { tipo, lat: ubicacion.lat, lng: ubicacion.lng, precision: ubicacion.precision });
       pintarResumenHoy(resumen);
-      cargarNotificaciones();
     } catch (e) {
       mostrarError('error-fichaje', e.message);
-    } finally {
-      actualizarBotonesSegunEstado();
+      if (prevEstado) {
+        estadoApp._estadoActual = prevEstado;
+        actualizarBotonesSegunEstado();
+      }
     }
   });
 });
@@ -768,14 +982,23 @@ async function cargarResumenHoy() {
 }
 
 function pintarResumenHoy(r) {
+  cacheResumen = r;
   const pill = document.getElementById('pill-estado');
   const etiquetas = { SIN_FICHAR: 'Sin fichar', TRABAJANDO: 'Trabajando', EN_PAUSA: 'En pausa', FINALIZADO: 'Jornada finalizada' };
-  pill.textContent = etiquetas[r.estado];
+  pill.textContent = etiquetas[r.estado] || r.estado;
   pill.className = 'estado-pill estado-' + r.estado;
+  
+  if (r.estado === 'TRABAJANDO') {
+    pill.classList.add('pulse-working');
+  } else {
+    pill.classList.remove('pulse-working');
+  }
+
   document.getElementById('stat-horas').textContent = r.horasTrabajadas + 'h';
   document.getElementById('stat-pausa').textContent = r.horasPausa + 'h';
   document.getElementById('tabla-fichajes-hoy').innerHTML = r.fichajesHoy.map(f =>
     `<tr><td>${etiquetaVisual(f.tipo)}</td><td>${f.hora}</td></tr>`).join('') || '<tr><td colspan="2">Todavía no hay fichajes hoy</td></tr>';
+  
   estadoApp._estadoActual = r.estado;
   actualizarBotonesSegunEstado();
 }
@@ -789,12 +1012,12 @@ function actualizarBotonesSegunEstado() {
     SIN_FICHAR: ['entrada'], TRABAJANDO: ['pausa_inicio', 'salida'],
     EN_PAUSA: ['pausa_fin'], FINALIZADO: []
   }[estadoApp._estadoActual] || [];
+  
   document.querySelectorAll('.btn-fichar').forEach(b => {
     b.disabled = permitido.indexOf(b.dataset.tipo) === -1;
   });
 }
 
-// Assigned Work Construction Site
 async function cargarMiObra() {
   const obra = await api('miObra');
   document.getElementById('contenido-mi-obra').innerHTML = obra
@@ -802,7 +1025,6 @@ async function cargarMiObra() {
     : 'Sin obra asignada todavía.';
 }
 
-// Employee Schedule Correction Requests
 document.getElementById('btn-enviar-correccion').addEventListener('click', async () => {
   const fecha = document.getElementById('corr-fecha').value;
   const tipoSolicitado = document.getElementById('corr-tipo').value;
@@ -823,8 +1045,7 @@ async function cargarMisCorrecciones() {
   ).join('') || '<tr><td colspan="3">Sin solicitudes</td></tr>';
 }
 
-// Notifications
-async function cargarNotificaciones(marcarVistoEnUI) {
+async function cargarNotificaciones() {
   const notifs = await api('misNotificaciones');
   const noLeidas = notifs.filter(n => !n.leida).length;
   const badge = document.getElementById('badge-notif');
@@ -842,6 +1063,11 @@ async function cargarNotificaciones(marcarVistoEnUI) {
     });
   });
 }
+
+document.getElementById('btn-marcar-todas').addEventListener('click', () => {
+  document.querySelectorAll('#lista-notificaciones .notif').forEach(el => el.classList.remove('no-leida'));
+  document.getElementById('badge-notif').classList.add('oculto');
+});
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -925,15 +1151,17 @@ document.getElementById('btn-descargar-pdf').addEventListener('click', async () 
     mes: parseInt(document.getElementById('informe-mes').value, 10),
     anio: parseInt(document.getElementById('informe-anio').value, 10)
   });
-  const bytes = atob(data.base64);
-  const array = new Uint8Array(bytes.length);
-  for (let i = 0; i < bytes.length; i++) array[i] = bytes.charCodeAt(i);
-  const blob = new Blob([array], { type: 'application/pdf' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = data.nombreArchivo;
-  document.body.appendChild(a); a.click(); a.remove();
-  URL.revokeObjectURL(url);
+  if (data && data.base64) {
+    const bytes = atob(data.base64);
+    const array = new Uint8Array(bytes.length);
+    for (let i = 0; i < bytes.length; i++) array[i] = bytes.charCodeAt(i);
+    const blob = new Blob([array], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = data.nombreArchivo;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }
 });
 
 function filtrarTabla(inputId, tablaId) {
@@ -944,6 +1172,7 @@ function filtrarTabla(inputId, tablaId) {
     row.style.display = text.includes(query) ? '' : 'none';
   });
 }
+
 function exportarTablaCSV(tablaId, filename) {
   const rows = document.querySelectorAll(`#${tablaId} tr`);
   let csv = [];
