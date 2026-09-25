@@ -1,1533 +1,1126 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FICHAOBRA — DuarteCobos y Asociados S.L.</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<!-- Font Awesome Icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<!-- Chart.js for reports analytics -->
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>FICHAOBRA — Registro de jornada</title>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-  :root {
-    --bg-dark: #080B11;
-    --bg-card: rgba(17, 24, 39, 0.75);
-    --border-color: rgba(255, 255, 255, 0.08);
-    --border-glow: rgba(0, 242, 254, 0.3);
-    
-    --neon-cyan: #00F2FE;
-    --neon-blue: #4FACFE;
-    --neon-amber: #FFB703;
-    --neon-red: #EF4444;
-    --neon-green: #10B981;
-    --neon-purple: #8B5CF6;
-
-    --text-main: #F3F4F6;
-    --text-muted: #9CA3AF;
-    --text-dim: #6B7280;
-    
-    --radius: 12px;
-  }
-
-  * { box-sizing: border-box; transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease; }
-  
-  body {
-    margin: 0;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    background: var(--bg-dark);
-    background-image: 
-      radial-gradient(at 0% 0%, rgba(0, 242, 254, 0.06) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.06) 0px, transparent 50%);
-    color: var(--text-main);
-    min-height: 100vh;
-  }
-
-  h1, h2, h3, .titular {
-    font-family: 'Orbitron', sans-serif;
-    letter-spacing: 0.5px;
-  }
-
-  button { font-family: inherit; cursor: pointer; border: none; outline: none; }
-  input, select, textarea { font-family: inherit; outline: none; }
-  .oculto { display: none !important; }
-
-  #pantalla-login {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: radial-gradient(circle at center, #0F172A 0%, #080B11 100%);
-    padding: 20px;
-    position: relative;
-  }
-
-  .tarjeta-login {
-    background: var(--bg-card);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    width: 100%;
-    max-width: 410px;
-    padding: 36px 30px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border-color);
-    box-shadow: 0 20px 50px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.1);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .tarjeta-login::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-blue));
-    box-shadow: 0 0 12px var(--neon-cyan);
-  }
-
-  .tarjeta-login h1 {
-    font-size: 24px;
-    margin: 0 0 4px;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .subtitulo-empresa {
-    color: var(--neon-cyan);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    margin-bottom: 20px;
-  }
-
-  .campo { margin-bottom: 18px; }
-  .campo label {
-    display: block;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--neon-cyan);
-    margin-bottom: 6px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-  .campo input, .campo select, .campo textarea {
-    width: 100%;
-    padding: 12px 14px;
-    background: rgba(15, 23, 42, 0.8);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 14px;
-    color: #fff;
-  }
-  .campo input:focus, .campo select:focus, .campo textarea:focus {
-    border-color: var(--neon-cyan);
-    box-shadow: 0 0 12px rgba(0, 242, 254, 0.2);
-  }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    padding: 13px 20px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .btn-primario {
-    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
-    color: #080B11;
-    box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
-  }
-  .btn-primario:hover {
-    box-shadow: 0 6px 20px rgba(0, 242, 254, 0.5);
-    transform: translateY(-1px);
-  }
-  .btn-oscuro {
-    background: rgba(30, 41, 59, 0.8);
-    color: #fff;
-    border: 1px solid var(--border-color);
-  }
-  .btn-oscuro:hover {
-    background: rgba(51, 65, 85, 0.9);
-    border-color: var(--text-muted);
-  }
-  .btn-borde {
-    background: transparent;
-    border: 1px solid var(--border-color);
-    color: var(--text-main);
-  }
-  .btn-borde:hover {
-    border-color: var(--neon-cyan);
-    color: var(--neon-cyan);
-  }
-  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
-
-  .error {
-    background: rgba(239, 68, 68, 0.15);
-    border: 1px solid var(--neon-red);
-    color: #FCA5A5;
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  #app { min-height: 100vh; padding-bottom: 80px; }
-  
-  header.top {
-    background: rgba(8, 11, 17, 0.88);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border-bottom: 1px solid var(--border-color);
-    padding: 14px 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  header.top .marca {
-    font-size: 18px;
-    font-weight: 900;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-  }
-  header.top .marca span.logo-sub {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 10px;
-    color: var(--neon-cyan);
-    letter-spacing: 1.5px;
-    font-weight: 700;
-  }
-  
-  .clock-widget {
-    font-family: 'Orbitron', monospace;
-    font-size: 13px;
-    color: var(--neon-cyan);
-    background: rgba(0, 242, 254, 0.08);
-    padding: 6px 14px;
-    border-radius: 20px;
-    border: 1px solid rgba(0, 242, 254, 0.2);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .acciones-top { display: flex; align-items: center; gap: 12px; }
-  .campana {
-    position: relative;
-    font-size: 18px;
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--text-main);
-    padding: 8px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-  }
-  .campana:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--neon-cyan); }
-  .badge {
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    background: var(--neon-red);
-    color: #fff;
-    font-size: 10px;
-    font-weight: 700;
-    border-radius: 10px;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 0 8px var(--neon-red);
-  }
-
-  main { max-width: 1100px; margin: 0 auto; padding: 24px 20px; }
-
-  .panel {
-    background: var(--bg-card);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-radius: var(--radius);
-    padding: 24px;
-    margin-bottom: 20px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-  }
-  .panel h2 {
-    margin: 0 0 18px;
-    font-size: 18px;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    color: #fff;
-  }
-
-  .estado-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .estado-SIN_FICHAR { background: rgba(156, 163, 175, 0.15); color: #9CA3AF; border: 1px solid #9CA3AF; }
-  .estado-TRABAJANDO { background: rgba(16, 185, 129, 0.15); color: var(--neon-green); border: 1px solid var(--neon-green); box-shadow: 0 0 10px rgba(16,185,129,0.2); }
-  .estado-EN_PAUSA { background: rgba(255, 183, 3, 0.15); color: var(--neon-amber); border: 1px solid var(--neon-amber); }
-  .estado-FINALIZADO { background: rgba(139, 92, 246, 0.15); color: var(--neon-purple); border: 1px solid var(--neon-purple); }
-
-  .rejilla-fichaje {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-    gap: 12px;
-    margin-top: 16px;
-  }
-  .btn-fichar {
-    padding: 16px 12px;
-    border-radius: var(--radius);
-    font-size: 14px;
-    font-weight: 700;
-    text-align: center;
-    color: #fff;
-    border: 1px solid transparent;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    position: relative;
-    overflow: hidden;
-  }
-  .btn-fichar small { font-weight: 400; font-size: 11px; opacity: 0.8; }
-  .btn-entrada { background: linear-gradient(135deg, rgba(16, 185, 129, 0.8), rgba(5, 150, 105, 0.8)); border-color: var(--neon-green); }
-  .btn-pausa { background: linear-gradient(135deg, rgba(245, 158, 11, 0.8), rgba(217, 119, 6, 0.8)); border-color: var(--neon-amber); }
-  .btn-salida { background: linear-gradient(135deg, rgba(239, 68, 68, 0.8), rgba(220, 38, 38, 0.8)); border-color: var(--neon-red); }
-
-  .stats { display: flex; gap: 16px; margin-top: 20px; flex-wrap: wrap; }
-  .stat {
-    flex: 1;
-    min-width: 140px;
-    background: rgba(15, 23, 42, 0.6);
-    padding: 14px 18px;
-    border-radius: 10px;
-    border: 1px solid var(--border-color);
-  }
-  .stat b { display: block; font-size: 24px; font-family: 'Orbitron', monospace; color: var(--neon-cyan); }
-  .stat span { font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
-
-  .table-responsive { width: 100%; overflow-x: auto; margin-top: 12px; }
-  table { width: 100%; border-collapse: collapse; font-size: 13.5px; text-align: left; }
-  th, td { padding: 12px 14px; border-bottom: 1px solid var(--border-color); }
-  th { color: var(--text-muted); font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
-  tr:hover td { background: rgba(255,255,255,0.02); }
-
-  .tabs-admin { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 20px; padding-bottom: 4px; }
-  .tab-btn {
-    background: rgba(15, 23, 42, 0.7);
-    border: 1px solid var(--border-color);
-    padding: 10px 18px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 600;
-    white-space: nowrap;
-    color: var(--text-muted);
-  }
-  .tab-btn:hover { color: #fff; border-color: var(--neon-cyan); }
-  .tab-btn.activo {
-    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
-    color: #080B11;
-    font-weight: 700;
-    border-color: transparent;
-  }
-
-  .lista-notif { max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-  .notif {
-    padding: 14px 16px;
-    border-radius: 8px;
-    background: rgba(15, 23, 42, 0.5);
-    border: 1px solid var(--border-color);
-    cursor: pointer;
-  }
-  .notif.no-leida {
-    background: rgba(0, 242, 254, 0.05);
-    border-color: rgba(0, 242, 254, 0.3);
-  }
-  .notif b { display: block; font-size: 14px; color: #fff; margin-bottom: 4px; }
-  .notif small { color: var(--text-dim); display: block; margin-top: 6px; font-size: 11px; }
-
-  footer.tabbar {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    background: rgba(8, 11, 17, 0.95);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-top: 1px solid var(--border-color);
-    display: flex;
-    justify-content: space-around;
-    padding: 10px 0;
-    z-index: 90;
-  }
-  footer.tabbar button {
-    background: none;
-    color: var(--text-muted);
-    font-size: 11px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 12px;
-  }
-  footer.tabbar button i { font-size: 16px; }
-  footer.tabbar button.activo { color: var(--neon-cyan); }
-
-  .search-bar {
-    width: 100%;
-    margin-bottom: 14px;
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px solid var(--border-color);
-    padding: 10px 14px;
-    border-radius: 8px;
-    color: #fff;
-  }
-
-  @media (min-width: 720px) {
-    footer.tabbar { display: none; }
-    #app { padding-bottom: 0; }
-  }
-  
-  .seccion-vista { display: none; }
-  .seccion-vista.visible { display: block; animation: fadeIn 0.2s ease-in-out; }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(4px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .grid-informes {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-  @media (min-width: 850px) {
-    .grid-informes {
-      grid-template-columns: 340px 1fr;
-    }
-  }
-
-  .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-  .kpi-card {
-    background: rgba(15, 23, 42, 0.7);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 14px;
-  }
-  .kpi-card .val {
-    font-family: 'Orbitron', monospace;
-    font-size: 20px;
-    font-weight: 700;
-    color: #fff;
-    margin-top: 4px;
-  }
-  .kpi-card .lbl {
-    font-size: 11px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    font-weight: 600;
-  }
-
-  .modal-overlay {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(8px);
-    z-index: 999;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 20px;
-    overflow-y: auto;
-  }
-  
-  .document-container {
-    background: #ffffff;
-    color: #111111;
-    width: 100%;
-    max-width: 800px;
-    padding: 40px 45px;
-    border-radius: 4px;
-    box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 11px;
-    line-height: 1.4;
-    margin: 20px auto;
-  }
-
-  .doc-header {
-    border-bottom: 2px solid #111;
-    padding-bottom: 12px;
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-  }
-  .doc-title { font-size: 17px; font-weight: bold; text-transform: uppercase; color: #000; margin: 0; }
-  .doc-subtitle { font-size: 11px; color: #333; font-weight: bold; margin-top: 4px; }
-  .doc-meta-right { text-align: right; font-size: 10px; color: #333; }
-
-  .doc-grid-info {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    background: #f8fafc;
-    border: 1px solid #cbd5e1;
-    padding: 10px 14px;
-    border-radius: 4px;
-    margin-bottom: 20px;
-  }
-  .doc-info-item b { color: #000; display: inline-block; width: 120px; }
-
-  .doc-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-    font-size: 10.5px;
-  }
-  .doc-table th, .doc-table td {
-    border: 1px solid #94a3b8;
-    padding: 7px 8px;
-    text-align: center;
-  }
-  .doc-table th { background: #e2e8f0; color: #0f172a; font-weight: bold; text-transform: uppercase; font-size: 9.5px; }
-  .doc-table tr:nth-child(even) { background: #f8fafc; }
-
-  .doc-kpi-summary {
-    display: flex;
-    justify-content: space-between;
-    background: #f1f5f9;
-    border: 1px solid #cbd5e1;
-    padding: 10px 16px;
-    border-radius: 4px;
-    margin-bottom: 24px;
-    font-weight: bold;
-  }
-
-  .doc-signatures {
-    margin-top: 45px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
-    page-break-inside: avoid;
-  }
-  .sig-box {
-    border-top: 1px solid #000;
-    padding-top: 8px;
-    text-align: center;
-    font-size: 10px;
-    color: #333;
-    min-height: 85px;
-  }
-
-  @media print {
-    body * { visibility: hidden; }
-    #modal-preview-doc, #modal-preview-doc * { visibility: visible; }
-    #modal-preview-doc { position: absolute; left: 0; top: 0; width: 100%; padding: 0; background: white; }
-    .document-container { box-shadow: none; max-width: 100%; width: 100%; padding: 0; margin: 0; }
-    .no-print { display: none !important; }
-  }
+:root{
+  --bg:#080d14;
+  --panel:#101823;
+  --panel2:#151f2d;
+  --border:#263548;
+  --text:#eef5ff;
+  --muted:#91a0b5;
+  --accent:#4df3b0;
+  --accent2:#5db7ff;
+  --danger:#ff637d;
+  --warning:#ffc857;
+  --success:#43e59b;
+  --shadow:0 18px 50px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:radial-gradient(circle at top,#142235 0,#080d14 48%);
+  color:var(--text);
+  font-family:Inter,Segoe UI,Arial,sans-serif;
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+.app{min-height:100vh}
+.topbar{
+  height:72px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 28px;
+  border-bottom:1px solid var(--border);
+  background:rgba(8,13,20,.86);
+  backdrop-filter:blur(14px);
+  position:sticky;
+  top:0;
+  z-index:20;
+}
+.brand{font-weight:900;letter-spacing:.08em}
+.brand span{color:var(--accent)}
+.userbox{display:flex;align-items:center;gap:12px;color:var(--muted)}
+.container{max-width:1400px;margin:auto;padding:28px}
+.grid{display:grid;gap:18px}
+.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{
+  background:linear-gradient(180deg,rgba(21,31,45,.96),rgba(14,22,32,.96));
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:20px;
+  box-shadow:var(--shadow);
+}
+.card h2,.card h3{margin:0 0 14px}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+.kpi{font-size:30px;font-weight:900;margin-top:6px}
+.kpi-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.status{
+  display:inline-flex;
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:800;
+}
+.status.ok{background:rgba(67,229,155,.12);color:var(--success)}
+.status.warn{background:rgba(255,200,87,.12);color:var(--warning)}
+.status.bad{background:rgba(255,99,125,.12);color:var(--danger)}
+.status.info{background:rgba(93,183,255,.12);color:var(--accent2)}
+.btn{
+  border:1px solid var(--border);
+  background:#182536;
+  color:var(--text);
+  padding:10px 14px;
+  border-radius:11px;
+  font-weight:800;
+}
+.btn:hover{filter:brightness(1.12)}
+.btn.primary{background:var(--accent);color:#06120d;border-color:var(--accent)}
+.btn.danger{background:rgba(255,99,125,.12);color:var(--danger);border-color:rgba(255,99,125,.35)}
+.btn.success{background:rgba(67,229,155,.12);color:var(--success);border-color:rgba(67,229,155,.35)}
+.btn.blue{background:rgba(93,183,255,.12);color:var(--accent2);border-color:rgba(93,183,255,.35)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.field{display:flex;flex-direction:column;gap:7px}
+label{font-size:12px;color:var(--muted);font-weight:700}
+input,select,textarea{
+  width:100%;
+  background:#0b131e;
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:11px 12px;
+  outline:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--accent2)}
+textarea{min-height:90px;resize:vertical}
+.login{
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  padding:20px;
+}
+.login-card{width:min(440px,100%)}
+.logo{
+  width:54px;height:54px;border-radius:16px;
+  display:grid;place-items:center;
+  background:var(--accent);color:#07130d;font-weight:1000;
+  margin-bottom:16px;
+}
+.login-card h1{margin:0 0 7px}
+.login-card .field{margin-top:14px}
+.login-card .btn{width:100%;margin-top:18px}
+.error{
+  margin-top:12px;
+  padding:10px 12px;
+  border-radius:10px;
+  background:rgba(255,99,125,.1);
+  color:var(--danger);
+  font-size:13px;
+}
+.employee-actions{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+}
+.punch{
+  min-height:92px;
+  border:1px solid var(--border);
+  border-radius:15px;
+  background:#111c29;
+  color:var(--text);
+  font-weight:900;
+}
+.punch strong{display:block;font-size:16px;margin-top:5px}
+.punch.green{border-color:rgba(67,229,155,.4)}
+.punch.yellow{border-color:rgba(255,200,87,.4)}
+.punch.blue{border-color:rgba(93,183,255,.4)}
+.punch.red{border-color:rgba(255,99,125,.4)}
+.tabs{
+  display:flex;gap:7px;flex-wrap:wrap;
+  margin-bottom:18px;
+}
+.tab{
+  padding:9px 13px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:#0d1621;
+  color:var(--muted);
+  font-weight:800;
+}
+.tab.active{color:var(--text);border-color:var(--accent);background:rgba(77,243,176,.08)}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:720px}
+th,td{padding:11px 10px;border-bottom:1px solid var(--border);text-align:left;font-size:13px;vertical-align:top}
+th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+tr:hover td{background:rgba(255,255,255,.018)}
+.toolbar{display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-bottom:16px}
+.toolbar .field{min-width:150px;flex:1}
+.toolbar .field.small-field{max-width:170px}
+.toastbox{
+  position:fixed;right:20px;bottom:20px;z-index:100;
+  display:flex;flex-direction:column;gap:8px;max-width:380px;
+}
+.toast{
+  padding:13px 15px;border-radius:12px;
+  border:1px solid var(--border);
+  background:#111b27;box-shadow:var(--shadow);
+}
+.toast.ok{border-color:rgba(67,229,155,.4)}
+.toast.err{border-color:rgba(255,99,125,.4)}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.report-header{
+  display:flex;justify-content:space-between;gap:15px;align-items:flex-start;
+  margin-bottom:18px;
+}
+.report-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.report-kpi{padding:15px;border:1px solid var(--border);border-radius:13px;background:#0c1520}
+.report-kpi .value{font-size:23px;font-weight:900;margin-top:5px}
+.report-table td,.report-table th{font-size:12px}
+.anomaly{color:var(--danger);font-size:11px;margin-top:4px}
+.modal{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);
+  display:grid;place-items:center;padding:20px;z-index:80;
+}
+.modal-card{width:min(900px,100%);max-height:90vh;overflow:auto}
+.close{float:right}
+.print-only{display:none}
+#reportChart{max-height:320px}
+@media(max-width:1000px){
+  .grid-4,.grid-3,.grid-2{grid-template-columns:1fr 1fr}
+  .report-kpis{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:700px){
+  .container{padding:16px}
+  .topbar{padding:0 15px}
+  .employee-actions{grid-template-columns:1fr 1fr}
+  .grid-4,.grid-3,.grid-2{grid-template-columns:1fr}
+  .report-kpis{grid-template-columns:1fr 1fr}
+}
+@media print{
+  body{background:#fff;color:#111}
+  .no-print,.topbar,.tabs,.toolbar,#reportChartWrap{display:none!important}
+  .print-only{display:block}
+  .card{box-shadow:none;border:0;padding:0}
+  .container{max-width:none;padding:0}
+  table{min-width:0}
+  th,td{border-color:#ccc;color:#111}
+}
 </style>
 </head>
-<body>
 
-<div id="pantalla-login">
-  <div class="tarjeta-login">
-    <h1><i class="fa-solid fa-hard-hat" style="color:var(--neon-cyan)"></i> FICHAOBRA</h1>
-    <div class="subtitulo-empresa">DuarteCobos y Asociados S.L.</div>
-    <p>Control de obra y fichaje legalizado ultra rápido</p>
-    
-    <div id="error-login" class="error oculto"></div>
-    
-    <div class="campo">
-      <label><i class="fa-solid fa-user"></i> Usuario</label>
-      <input type="text" id="input-usuario" placeholder="Ej: admin o empleado" autocomplete="username">
+<body>
+<div id="loginView" class="login">
+  <div class="card login-card">
+    <div class="logo">FO</div>
+    <h1>FICHA<span style="color:var(--accent)">OBRA</span></h1>
+    <div class="muted">Registro de jornada</div>
+
+    <div class="field">
+      <label>Usuario</label>
+      <input id="loginUsuario" autocomplete="username">
     </div>
-    <div class="campo">
-      <label><i class="fa-solid fa-lock"></i> Contraseña</label>
-      <input type="password" id="input-password" placeholder="••••••••" autocomplete="current-password">
+
+    <div class="field">
+      <label>Contraseña</label>
+      <input id="loginPassword" type="password" autocomplete="current-password">
     </div>
-    <button class="btn btn-primario" id="btn-login"><i class="fa-solid fa-right-to-bracket"></i> Entrar al Sistema</button>
+
+    <button class="btn primary" onclick="iniciarSesion()">Entrar</button>
+    <div id="loginError" class="error hidden"></div>
   </div>
 </div>
 
-<div id="app" class="oculto">
-  <header class="top">
-    <div class="marca titular">
-      <div><i class="fa-solid fa-hard-hat" style="color:var(--neon-cyan)"></i> FICHA<span>OBRA</span></div>
-      <span class="logo-sub">DuarteCobos y Asociados S.L.</span>
-    </div>
-    
-    <div class="clock-widget" id="live-clock">
-      <i class="fa-solid fa-clock"></i> <span id="clock-time">00:00:00</span>
-    </div>
-
-    <div class="acciones-top">
-      <button class="campana" id="btn-campana" title="Notificaciones">
-        <i class="fa-solid fa-bell"></i><span id="badge-notif" class="badge oculto">0</span>
-      </button>
-      <button class="btn btn-borde" style="width:auto; padding:8px 14px;" id="btn-salir-sesion">
-        <i class="fa-solid fa-power-off"></i> <span style="display:none;" class="sm:inline">Salir</span>
-      </button>
+<div id="appView" class="app hidden">
+  <header class="topbar">
+    <div class="brand">FICHA<span>OBRA</span></div>
+    <div class="userbox">
+      <span id="topUser"></span>
+      <span id="topRole" class="status info"></span>
+      <button class="btn" onclick="cerrarSesion()">Salir</button>
     </div>
   </header>
 
-  <main>
-
-    <section id="vista-empleado" class="seccion-vista">
-      <div class="panel">
-        <h2>
-          <span><i class="fa-solid fa-business-time" style="color:var(--neon-cyan)"></i> Mi Jornada de Hoy</span>
-          <span id="pill-estado" class="estado-pill estado-SIN_FICHAR">Sin fichar</span>
-        </h2>
-        
-        <div id="error-fichaje" class="error oculto"></div>
-        
-        <div class="rejilla-fichaje">
-          <button class="btn-fichar btn-entrada" data-tipo="entrada"><i class="fa-solid fa-play"></i><span class="btn-text">Entrada</span><small>Empezar</small></button>
-          <button class="btn-fichar btn-pausa" data-tipo="pausa_inicio"><i class="fa-solid fa-pause"></i><span class="btn-text">Iniciar pausa</span><small>Descanso</small></button>
-          <button class="btn-fichar btn-pausa" data-tipo="pausa_fin"><i class="fa-solid fa-rotate-left"></i><span class="btn-text">Fin pausa</span><small>Reanudar</small></button>
-          <button class="btn-fichar btn-salida" data-tipo="salida"><i class="fa-solid fa-stop"></i><span class="btn-text">Salida</span><small>Terminar</small></button>
-        </div>
-        
-        <div class="stats">
-          <div class="stat"><b id="stat-horas">0.0h</b><span>Horas trabajadas</span></div>
-          <div class="stat"><b id="stat-pausa">0.0h</b><span>Horas de pausa</span></div>
-        </div>
-        
-        <div class="table-responsive">
-          <table>
-            <thead><tr><th>Evento</th><th>Hora</th></tr></thead>
-            <tbody id="tabla-fichajes-hoy"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="panel">
-        <h2><i class="fa-solid fa-helmet-safety" style="color:var(--neon-blue)"></i> Mi obra asignada</h2>
-        <div id="contenido-mi-obra">Cargando información de obra...</div>
-      </div>
-
-      <div class="panel">
-        <h2><i class="fa-solid fa-pen-to-square" style="color:var(--neon-amber)"></i> Solicitar corrección de horario</h2>
-        <div id="error-correccion" class="error oculto"></div>
-        <div class="campo"><label>Fecha del fichaje</label><input type="date" id="corr-fecha"></div>
-        <div class="campo"><label>Tipo de Evento</label>
-          <select id="corr-tipo">
-            <option value="entrada">Entrada</option>
-            <option value="pausa_inicio">Inicio de pausa</option>
-            <option value="pausa_fin">Fin de pausa</option>
-            <option value="salida">Salida</option>
-          </select>
-        </div>
-        <div class="campo"><label>Hora correcta</label><input type="time" id="corr-hora"></div>
-        <div class="campo"><label>Motivo justificativo</label><textarea id="corr-motivo" rows="2"></textarea></div>
-        <button class="btn btn-oscuro" id="btn-enviar-correccion" style="width:auto;"><i class="fa-solid fa-paper-plane"></i> Enviar solicitud</button>
-
-        <h3 style="margin-top:28px; font-size:15px; color:var(--text-muted);"><i class="fa-solid fa-clock-rotate-left"></i> Mis Solicitudes Recientes</h3>
-        <div class="table-responsive">
-          <table>
-            <thead><tr><th>Fecha</th><th>Tipo</th><th>Estado</th></tr></thead>
-            <tbody id="tabla-mis-correcciones"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <section id="vista-admin" class="seccion-vista">
-      <div class="tabs-admin">
-        <button class="tab-btn activo" data-tab="equipo"><i class="fa-solid fa-users"></i> Equipo</button>
-        <button class="tab-btn" data-tab="obras"><i class="fa-solid fa-city"></i> Obras</button>
-        <button class="tab-btn" data-tab="correcciones"><i class="fa-solid fa-clipboard-check"></i> Correcciones</button>
-        <button class="tab-btn" data-tab="informes"><i class="fa-solid fa-file-contract"></i> Informes & Inspección</button>
-        <button class="tab-btn" data-tab="auditoria"><i class="fa-solid fa-shield-halved"></i> Auditoría</button>
-      </div>
-
-      <div class="panel admin-tab" data-tab="equipo">
-        <h2>
-          <span><i class="fa-solid fa-users-gear"></i> Estado del Equipo en Vivo</span>
-          <button class="btn btn-borde" style="width:auto; padding:4px 10px; font-size:11px;" onclick="exportarTablaCSV('tabla-equipo', 'equipo_fichajes.csv')"><i class="fa-solid fa-download"></i> Exportar CSV</button>
-        </h2>
-        <input type="text" id="filter-equipo" class="search-bar" placeholder="🔎 Buscar por empleado u obra..." onkeyup="filtrarTabla('filter-equipo', 'tabla-equipo')">
-        <div class="table-responsive">
-          <table>
-            <thead><tr><th>Empleado</th><th>Estado</th><th>Horas hoy</th><th>Obra</th></tr></thead>
-            <tbody id="tabla-equipo"></tbody>
-          </table>
-        </div>
-        
-        <h3 style="margin-top:28px; font-size:15px; color:var(--neon-cyan);"><i class="fa-solid fa-user-plus"></i> Dar de alta un empleado</h3>
-        <div class="campo"><label>Nombre completo</label><input id="nuevo-nombre"></div>
-        <div class="campo"><label>Usuario de acceso</label><input id="nuevo-usuario"></div>
-        <div class="campo"><label>Contraseña provisional</label><input id="nuevo-password" type="text"></div>
-        <div class="campo"><label>Rol en plataforma</label>
-          <select id="nuevo-rol"><option value="empleado">Empleado</option><option value="admin">Administrador</option></select>
-        </div>
-        <button class="btn btn-oscuro" id="btn-crear-empleado" style="width:auto;"><i class="fa-solid fa-plus"></i> Crear Usuario</button>
-      </div>
-
-      <div class="panel admin-tab oculto" data-tab="obras">
-        <h2><i class="fa-solid fa-building-user"></i> Gestión de Obras</h2>
-        <div class="table-responsive">
-          <table>
-            <thead><tr><th>Nombre</th><th>Dirección</th><th>Estado</th></tr></thead>
-            <tbody id="tabla-obras"></tbody>
-          </table>
-        </div>
-        
-        <h3 style="margin-top:28px; font-size:15px; color:var(--neon-cyan);"><i class="fa-solid fa-folder-plus"></i> Nueva Obra</h3>
-        <div class="campo"><label>Nombre de la Obra</label><input id="obra-nombre"></div>
-        <div class="campo"><label>Dirección completa</label><input id="obra-direccion"></div>
-        <button class="btn btn-oscuro" id="btn-crear-obra" style="width:auto;"><i class="fa-solid fa-plus"></i> Crear Obra</button>
-
-        <h3 style="margin-top:28px; font-size:15px; color:var(--neon-cyan);"><i class="fa-solid fa-link"></i> Asignar obra a empleado</h3>
-        <div class="campo"><label>Empleado</label><select id="asignar-empleado"></select></div>
-        <div class="campo"><label>Obra</label><select id="asignar-obra"></select></div>
-        <button class="btn btn-oscuro" id="btn-asignar-obra" style="width:auto;"><i class="fa-solid fa-check"></i> Asignar</button>
-      </div>
-
-      <div class="panel admin-tab oculto" data-tab="correcciones">
-        <h2><i class="fa-solid fa-clock-rotate-left"></i> Solicitudes de corrección pendientes</h2>
-        <div class="table-responsive">
-          <table>
-            <thead><tr><th>Empleado</th><th>Fecha</th><th>Tipo</th><th>Motivo</th><th>Acción</th></tr></thead>
-            <tbody id="tabla-correcciones"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="panel admin-tab oculto" data-tab="informes">
-        <h2>
-          <span><i class="fa-solid fa-chart-pie" style="color:var(--neon-cyan)"></i> Informes de Fichajes Reales</span>
-          <span class="estado-pill estado-TRABAJANDO" style="font-size:10px;"><i class="fa-solid fa-shield-check"></i> Inspección de Trabajo Compliant</span>
-        </h2>
-
-        <div class="grid-informes">
-          <!-- LEFT CONTROLS -->
-          <div style="background:rgba(15,23,42,0.5); padding:18px; border-radius:10px; border:1px solid var(--border-color);">
-            <h3 style="font-size:14px; margin-top:0; color:#fff; font-family:'Plus Jakarta Sans', sans-serif; text-transform:uppercase; letter-spacing:0.5px;">
-              <i class="fa-solid fa-filter" style="color:var(--neon-cyan)"></i> Filtros de Registro Real
-            </h3>
-
-            <div class="campo">
-              <label>Empleado</label>
-              <select id="informe-empleado-sel"></select>
+  <main class="container">
+    <section id="empleadoView" class="hidden">
+      <div class="grid grid-2">
+        <div class="card">
+          <h2>Jornada de hoy</h2>
+          <div id="estadoHoy" class="status info">Cargando...</div>
+          <div class="grid grid-2" style="margin-top:18px">
+            <div>
+              <div class="kpi-label">Trabajado</div>
+              <div id="horasHoy" class="kpi">0.00 h</div>
             </div>
-
-            <div class="campo" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-              <div>
-                <label>Mes</label>
-                <select id="informe-mes-sel">
-                  <option value="1">Enero</option>
-                  <option value="2">Febrero</option>
-                  <option value="3">Marzo</option>
-                  <option value="4">Abril</option>
-                  <option value="5">Mayo</option>
-                  <option value="6">Junio</option>
-                  <option value="7">Julio</option>
-                  <option value="8">Agosto</option>
-                  <option value="9">Septiembre</option>
-                  <option value="10">Octubre</option>
-                  <option value="11">Noviembre</option>
-                  <option value="12">Diciembre</option>
-                </select>
-              </div>
-              <div>
-                <label>Año</label>
-                <select id="informe-anio-sel">
-                  <option value="2026">2026</option>
-                  <option value="2025">2025</option>
-                  <option value="2024">2024</option>
-                </select>
-              </div>
-            </div>
-
-            <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
-              <button class="btn btn-primario" onclick="cargarDatosInformeConFichajesReales()"><i class="fa-solid fa-magnifying-glass"></i> Generar Informe con Fichajes Reales</button>
-              <button class="btn btn-oscuro" onclick="abrirPrevisualizacionDocumento()"><i class="fa-solid fa-file-pdf"></i> Previsualizar / Exportar A4</button>
-            </div>
-          </div>
-
-          <!-- RIGHT DASHBOARD ANALYTICS -->
-          <div>
-            <div class="kpi-grid">
-              <div class="kpi-card">
-                <div class="lbl">Horas Ordinarias</div>
-                <div class="val" id="kpi-total-horas" style="color:var(--neon-cyan);">0.0h</div>
-              </div>
-              <div class="kpi-card">
-                <div class="lbl">Días Fichados</div>
-                <div class="val" id="kpi-dias-trabajados">0</div>
-              </div>
-              <div class="kpi-card">
-                <div class="lbl">Promedio Diario</div>
-                <div class="val" id="kpi-promedio-diario" style="color:var(--neon-green);">0.0h</div>
-              </div>
-              <div class="kpi-card">
-                <div class="lbl">Tiempo Pausas</div>
-                <div class="val" id="kpi-total-pausas" style="color:var(--neon-amber);">0.0h</div>
-              </div>
-            </div>
-
-            <!-- ANALYTICS CHART CONTAINER -->
-            <div style="background:rgba(15,23,42,0.5); padding:16px; border-radius:10px; border:1px solid var(--border-color); height:240px; position:relative;">
-              <canvas id="chartReportes"></canvas>
-            </div>
-
-            <div style="margin-top:16px;">
-              <h3 style="font-size:14px; color:#fff; font-family:'Plus Jakarta Sans', sans-serif; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-                <span><i class="fa-solid fa-list-check" style="color:var(--neon-cyan)"></i> Registros de Fichajes Reales del Periodo</span>
-                <small style="font-weight:normal; color:var(--text-muted); font-size:11px;" id="lbl-conteo-registros">0 registros reales</small>
-              </h3>
-              <div class="table-responsive" style="max-height:220px; overflow-y:auto;">
-                <table>
-                  <thead><tr><th>Fecha</th><th>Entrada</th><th>Pausa</th><th>Salida</th><th>Total</th></tr></thead>
-                  <tbody id="tabla-previa-informe">
-                    <tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Haz clic en "Generar Informe con Fichajes Reales" para consultar los datos.</td></tr>
-                  </tbody>
-                </table>
-              </div>
+            <div>
+              <div class="kpi-label">Pausa</div>
+              <div id="pausaHoy" class="kpi">0.00 h</div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="panel admin-tab oculto" data-tab="auditoria">
-        <h2>
-          <span><i class="fa-solid fa-box-archive"></i> Registro de Auditoría</span>
-          <button class="btn btn-borde" style="width:auto; padding:4px 10px; font-size:11px;" onclick="exportarTablaCSV('tabla-auditoria', 'auditoria.csv')"><i class="fa-solid fa-download"></i> Exportar CSV</button>
-        </h2>
-        <input type="text" id="filter-auditoria" class="search-bar" placeholder="🔎 Filtrar eventos o usuarios..." onkeyup="filtrarTabla('filter-auditoria', 'tabla-auditoria')">
-        <div class="table-responsive">
-          <table>
-            <thead><tr><th>Fecha</th><th>Actor</th><th>Rol</th><th>Acción</th><th>Detalle</th></tr></thead>
-            <tbody id="tabla-auditoria"></tbody>
-          </table>
+        <div class="card">
+          <h2>Obra asignada</h2>
+          <div id="miObra">Cargando...</div>
         </div>
       </div>
-    </section>
 
-    <section id="vista-notificaciones" class="seccion-vista">
-      <div class="panel">
-        <h2>
-          <span><i class="fa-solid fa-bell" style="color:var(--neon-cyan)"></i> Notificaciones</span>
-          <div style="display:flex; gap:8px;">
-            <button class="btn btn-borde" id="btn-marcar-todas" style="width:auto; padding:6px 12px; font-size:12px;">
-              <i class="fa-solid fa-check-double"></i> Leer todas
-            </button>
-            <button class="btn btn-borde" id="btn-volver-notif" style="width:auto; padding:6px 14px; font-size:12px;">
-              <i class="fa-solid fa-arrow-left"></i> Volver
-            </button>
+      <div class="card" style="margin-top:18px">
+        <h2>Fichar</h2>
+        <p class="muted small">La ubicación se obtiene desde el navegador al realizar el fichaje.</p>
+
+        <div class="employee-actions">
+          <button id="btnEntrada" class="punch green" onclick="hacerFichaje('entrada')">
+            ENTRADA<strong>▶</strong>
+          </button>
+          <button id="btnPausaInicio" class="punch yellow" onclick="hacerFichaje('pausa_inicio')">
+            PAUSA<strong>Ⅱ</strong>
+          </button>
+          <button id="btnPausaFin" class="punch blue" onclick="hacerFichaje('pausa_fin')">
+            FIN PAUSA<strong>▶</strong>
+          </button>
+          <button id="btnSalida" class="punch red" onclick="hacerFichaje('salida')">
+            SALIDA<strong>■</strong>
+          </button>
+        </div>
+
+        <div id="fichajesHoy" style="margin-top:18px"></div>
+      </div>
+
+      <div class="grid grid-2" style="margin-top:18px">
+        <div class="card">
+          <h2>Solicitar corrección</h2>
+          <div class="grid grid-2">
+            <div class="field">
+              <label>Fecha</label>
+              <input id="corrFecha" type="date">
+            </div>
+            <div class="field">
+              <label>Tipo</label>
+              <select id="corrTipo">
+                <option value="entrada">Entrada</option>
+                <option value="pausa_inicio">Inicio de pausa</option>
+                <option value="pausa_fin">Fin de pausa</option>
+                <option value="salida">Salida</option>
+              </select>
+            </div>
           </div>
-        </h2>
-        <div class="lista-notif" id="lista-notificaciones"></div>
+          <div class="grid grid-2" style="margin-top:12px">
+            <div class="field">
+              <label>Hora</label>
+              <input id="corrHora" type="time">
+            </div>
+            <div class="field">
+              <label>Motivo</label>
+              <input id="corrMotivo" placeholder="Ej. olvidé fichar la salida">
+            </div>
+          </div>
+          <button class="btn primary" style="margin-top:14px" onclick="enviarCorreccion()">Enviar solicitud</button>
+        </div>
+
+        <div class="card">
+          <h2>Mis solicitudes</h2>
+          <div id="misCorrecciones"></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <h2>Notificaciones</h2>
+        <div id="misNotificaciones"></div>
       </div>
     </section>
 
+    <section id="adminView" class="hidden">
+      <div class="tabs no-print">
+        <button class="tab active" data-tab="equipo" onclick="cambiarAdminTab('equipo')">Equipo</button>
+        <button class="tab" data-tab="obras" onclick="cambiarAdminTab('obras')">Obras</button>
+        <button class="tab" data-tab="correcciones" onclick="cambiarAdminTab('correcciones')">Correcciones</button>
+        <button class="tab" data-tab="informes" onclick="cambiarAdminTab('informes')">Informes</button>
+        <button class="tab" data-tab="auditoria" onclick="cambiarAdminTab('auditoria')">Auditoría</button>
+      </div>
+
+      <div id="admin-equipo" class="admin-tab"></div>
+      <div id="admin-obras" class="admin-tab hidden"></div>
+      <div id="admin-correcciones" class="admin-tab hidden"></div>
+      <div id="admin-informes" class="admin-tab hidden"></div>
+      <div id="admin-auditoria" class="admin-tab hidden"></div>
+    </section>
   </main>
-
-  <footer class="tabbar">
-    <button class="tab-inferior activo" data-vista="empleado"><i class="fa-solid fa-user-clock"></i>Fichaje</button>
-    <button class="tab-inferior oculto" data-vista="admin" id="tab-admin"><i class="fa-solid fa-user-shield"></i>Admin</button>
-    <button class="tab-inferior" data-vista="notificaciones"><i class="fa-solid fa-bell"></i>Notif</button>
-  </footer>
 </div>
 
-<div id="modal-preview-doc" class="modal-overlay oculto">
-  <div style="width:100%; max-width:860px;">
-    <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-      <span style="color:#fff; font-size:14px; font-weight:700;"><i class="fa-solid fa-print" style="color:var(--neon-cyan)"></i> Vista Previa del Informe Oficial (A4 Eco-Ink)</span>
-      <div style="display:flex; gap:10px;">
-        <button class="btn btn-primario" onclick="window.print()" style="width:auto; padding:8px 18px;"><i class="fa-solid fa-print"></i> Imprimir / Guardar PDF</button>
-        <button class="btn btn-oscuro" onclick="cerrarPrevisualizacionDocumento()" style="width:auto; padding:8px 14px;"><i class="fa-solid fa-xmark"></i> Cerrar</button>
-      </div>
-    </div>
+<div id="toastbox" class="toastbox"></div>
 
-    <!-- PRINTABLE DOCUMENT CONTAINER -->
-    <div class="document-container" id="contenido-documento-a4">
-      <!-- Rendered dynamically -->
-    </div>
+<div id="modal" class="modal hidden" onclick="cerrarModal(event)">
+  <div class="card modal-card" onclick="event.stopPropagation()">
+    <button class="btn close" onclick="cerrarModal()">Cerrar</button>
+    <div id="modalContent"></div>
   </div>
 </div>
 
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbxxc_tXI2gFx7zkQgmgP5sLR5rnio2ZijODWNw7JNPWvbrRu5JENpudkbGIX_X4VS-g/exec';
+const SESSION_KEY = 'sesionFichajes';
 
-let estadoApp = { token: null, rol: null, nombre: null, empleadoId: null };
-let ultimaVista = 'empleado';
-let chartInstance = null;
-let listaEmpleadosGlobal = [];
-let datosInformeActual = [];
+let sesion = null;
+let empleados = [];
+let obras = [];
+let correcciones = [];
+let auditoria = [];
+let informeActual = null;
+let chart = null;
+let adminTabLoaded = {};
 
-// Clock ticking
-setInterval(() => {
-  const clockEl = document.getElementById('clock-time');
-  if (clockEl) {
-    const now = new Date();
-    clockEl.textContent = now.toLocaleTimeString('es-ES');
-  }
-}, 1000);
+function $(id){ return document.getElementById(id); }
 
-// API Caller
-async function api(action, extra) {
-  const cuerpo = Object.assign({ action: action, token: estadoApp.token }, extra || {});
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 12000);
-
-  try {
-    const resp = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(cuerpo),
-      signal: controller.signal
-    });
-    clearTimeout(timeoutId);
-    const json = await resp.json();
-    if (!json.ok) throw new Error(json.error || 'Error en servidor');
-    return json.data;
-  } catch (e) {
-    clearTimeout(timeoutId);
-    if (e.name === 'AbortError') {
-      throw new Error("Tiempo de espera agotado al conectar con el servidor.");
-    }
-    throw e;
-  }
+function escapeHtml(v){
+  return String(v == null ? '' : v)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#039;');
 }
 
-async function apiSinToken(action, extra) {
-  const resp = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(Object.assign({ action }, extra))
+function mostrarToast(msg, tipo='ok'){
+  const box = $('toastbox');
+  const el = document.createElement('div');
+  el.className = 'toast ' + (tipo === 'err' ? 'err' : 'ok');
+  el.textContent = msg;
+  box.appendChild(el);
+  setTimeout(()=>el.remove(),4200);
+}
+
+async function api(action, extra={}){
+  const payload = Object.assign({action, token: sesion ? sesion.token : ''}, extra);
+
+  const response = await fetch(API_URL,{
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify(payload)
   });
-  const json = await resp.json();
-  if (!json.ok) throw new Error(json.error || 'Autenticación fallida');
+
+  const json = await response.json();
+
+  if(!json.ok) throw new Error(json.error || 'Error del servidor');
   return json.data;
 }
 
-function mostrarError(id, mensaje) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.textContent = mensaje;
-  el.classList.remove('oculto');
-  setTimeout(() => el.classList.add('oculto'), 5000);
+function guardarSesion(){
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(sesion));
 }
 
-// Authentication Logic
-async function ejecutarLogin() {
-  const usuario = document.getElementById('input-usuario').value.trim();
-  const password = document.getElementById('input-password').value;
-  const btn = document.getElementById('btn-login');
-
-  if (!usuario || !password) { mostrarError('error-login', 'Por favor introduce usuario y contraseña'); return; }
-
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Autenticando...';
-
-  try {
-    const data = await apiSinToken('login', { usuario, password });
-    estadoApp = { token: data.token, rol: data.rol, nombre: data.nombre, empleadoId: data.empleadoId };
-    sessionStorage.setItem('sesionFichajes', JSON.stringify(estadoApp));
-    arrancarApp();
-  } catch (e) {
-    mostrarError('error-login', e.message || 'Error de conexión con el servidor');
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Entrar al Sistema';
-  }
+function cargarSesion(){
+  try{
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    if(!raw) return null;
+    return JSON.parse(raw);
+  }catch(e){ return null; }
 }
 
-document.getElementById('btn-login').addEventListener('click', ejecutarLogin);
-['input-usuario', 'input-password'].forEach(id => {
-  document.getElementById(id).addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') ejecutarLogin();
-  });
-});
+async function iniciarSesion(){
+  $('loginError').classList.add('hidden');
 
-document.getElementById('btn-salir-sesion').addEventListener('click', async () => {
-  try { await api('logout'); } catch (e) {}
-  sessionStorage.removeItem('sesionFichajes');
-  location.reload();
-});
+  try{
+    const usuario = $('loginUsuario').value.trim();
+    const password = $('loginPassword').value;
 
-// Restore Session on reload
-(function restaurar() {
-  const guardada = sessionStorage.getItem('sesionFichajes');
-  if (guardada) { estadoApp = JSON.parse(guardada); arrancarApp(); }
-})();
+    if(!usuario || !password) throw new Error('Introduce usuario y contraseña');
 
-function arrancarApp() {
-  document.getElementById('pantalla-login').classList.add('oculto');
-  document.getElementById('app').classList.remove('oculto');
-  if (estadoApp.rol === 'admin') document.getElementById('tab-admin').classList.remove('oculto');
-  
-  // Set current month & year in selector defaults
-  const ahora = new Date();
-  document.getElementById('informe-mes-sel').value = (ahora.getMonth() + 1).toString();
-  document.getElementById('informe-anio-sel').value = ahora.getFullYear().toString();
+    const payload = {
+      action:'login',
+      usuario,
+      password
+    };
 
-  cambiarVista(estadoApp.rol === 'admin' ? 'admin' : 'empleado');
-  cargarTodo();
-  setInterval(cargarNotificaciones, 25000);
-}
-
-document.querySelectorAll('.tab-inferior').forEach(btn => {
-  btn.addEventListener('click', () => cambiarVista(btn.dataset.vista));
-});
-
-function cambiarVista(nombre) {
-  const currentVisible = document.querySelector('.seccion-vista.visible');
-  if (currentVisible && currentVisible.id !== 'vista-notificaciones') {
-    ultimaVista = currentVisible.id.replace('vista-', '');
-  }
-
-  document.querySelectorAll('.seccion-vista').forEach(s => s.classList.remove('visible'));
-  document.getElementById('vista-' + nombre).classList.add('visible');
-  document.querySelectorAll('.tab-inferior').forEach(b => b.classList.toggle('activo', b.dataset.vista === nombre));
-  
-  if (nombre === 'admin') cargarAdmin();
-  if (nombre === 'notificaciones') cargarNotificaciones();
-}
-
-document.getElementById('btn-campana').addEventListener('click', () => cambiarVista('notificaciones'));
-document.getElementById('btn-volver-notif').addEventListener('click', () => {
-  cambiarVista(ultimaVista || (estadoApp.rol === 'admin' ? 'admin' : 'empleado'));
-});
-
-// Admin Subtabs
-document.querySelectorAll('.tabs-admin .tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tabs-admin .tab-btn').forEach(b => b.classList.remove('activo'));
-    btn.classList.add('activo');
-    const target = btn.dataset.tab;
-    document.querySelectorAll('.admin-tab').forEach(t => {
-      t.classList.toggle('oculto', t.dataset.tab !== target);
+    const response = await fetch(API_URL,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify(payload)
     });
-  });
-});
 
-function cargarTodo() {
-  cargarResumenHoy();
-  cargarMiObra();
-  cargarMisCorrecciones();
-  cargarNotificaciones();
-  if (estadoApp.rol === 'admin') cargarAdmin();
-}
+    const json = await response.json();
+    if(!json.ok) throw new Error(json.error || 'No se pudo iniciar sesión');
 
-async function cargarResumenHoy() {
-  try {
-    const data = await api('resumenHoy');
-    pintarResumenHoy(data);
-  } catch (e) {
-    mostrarError('error-fichaje', 'Error cargando jornada de hoy: ' + e.message);
+    sesion = json.data;
+    guardarSesion();
+    mostrarApp();
+  }catch(e){
+    $('loginError').textContent = e.message;
+    $('loginError').classList.remove('hidden');
   }
 }
 
-function pintarResumenHoy(data) {
-  const pill = document.getElementById('pill-estado');
-  pill.className = 'estado-pill estado-' + (data.estado || 'SIN_FICHAR');
-  pill.textContent = (data.estado || 'SIN_FICHAR').replace('_', ' ');
+async function cerrarSesion(){
+  try{
+    if(sesion) await api('logout');
+  }catch(e){}
+  sessionStorage.removeItem(SESSION_KEY);
+  sesion = null;
+  $('appView').classList.add('hidden');
+  $('loginView').classList.remove('hidden');
+}
 
-  document.getElementById('stat-horas').textContent = (data.horasTrabajadas || 0).toFixed(1) + 'h';
-  document.getElementById('stat-pausa').textContent = (data.horasPausa || 0).toFixed(1) + 'h';
+function mostrarApp(){
+  $('loginView').classList.add('hidden');
+  $('appView').classList.remove('hidden');
 
-  const tbody = document.getElementById('tabla-fichajes-hoy');
-  tbody.innerHTML = '';
-  if (!data.fichajes || data.fichajes.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-dim);">No hay registros hoy</td></tr>';
-  } else {
-    data.fichajes.forEach(f => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td><b>${f.tipo.toUpperCase().replace('_', ' ')}</b></td><td>${f.hora}</td>`;
-      tbody.appendChild(tr);
-    });
+  $('topUser').textContent = sesion.nombre || sesion.empleadoId;
+  $('topRole').textContent = sesion.rol === 'admin' ? 'Administrador' : 'Empleado';
+
+  if(sesion.rol === 'admin'){
+    $('empleadoView').classList.add('hidden');
+    $('adminView').classList.remove('hidden');
+    cargarAdminInicial();
+  }else{
+    $('adminView').classList.add('hidden');
+    $('empleadoView').classList.remove('hidden');
+    cargarEmpleado();
   }
 }
 
-document.querySelectorAll('.btn-fichar').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    const tipo = btn.dataset.tipo;
-    document.querySelectorAll('.btn-fichar').forEach(b => b.disabled = true);
-    
-    try {
-      await api('fichar', { tipo, lat: 40.416, lng: -3.703 });
-      await cargarResumenHoy();
-    } catch (e) {
-      mostrarError('error-fichaje', e.message);
-    } finally {
-      document.querySelectorAll('.btn-fichar').forEach(b => b.disabled = false);
-    }
-  });
-});
+async function cargarEmpleado(){
+  $('corrFecha').value = new Date().toISOString().slice(0,10);
 
-async function cargarMiObra() {
-  try {
-    const res = await api('miObra');
-    const el = document.getElementById('contenido-mi-obra');
-    if (!res || !res.nombre) {
-      el.innerHTML = '<p style="color:var(--text-muted)">No tienes ninguna obra asignada actualmente.</p>';
-    } else {
-      el.innerHTML = `<div style="font-size:16px; font-weight:700; color:#fff;">${res.nombre}</div><div style="font-size:13px; color:var(--text-muted);">${res.direccion || 'Sin dirección especificada'}</div>`;
-    }
-  } catch (e) {}
-}
-
-async function cargarMisCorrecciones() {
-  try {
-    const res = await api('misCorrecciones');
-    const tbody = document.getElementById('tabla-mis-correcciones');
-    tbody.innerHTML = '';
-    if (!res || res.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--text-dim);">Sin solicitudes</td></tr>';
-      return;
-    }
-    res.forEach(c => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${c.fecha}</td><td>${c.tipo}</td><td><span class="estado-pill estado-${c.estado}">${c.estado}</span></td>`;
-      tbody.appendChild(tr);
-    });
-  } catch (e) {}
-}
-
-async function cargarAdmin() {
-  try {
-    const [equipo, obras, correcciones, auditoria, empleados] = await Promise.all([
-      api('adminEquipo'),
-      api('adminObras'),
-      api('adminCorrecciones'),
-      api('adminAuditoria'),
-      api('adminEmpleados')
+  try{
+    await Promise.all([
+      cargarResumenHoy(),
+      cargarMiObra(),
+      cargarMisCorrecciones(),
+      cargarNotificaciones()
     ]);
-
-    listaEmpleadosGlobal = empleados || [];
-
-    // Render Equipo
-    const tbEquipo = document.getElementById('tabla-equipo');
-    tbEquipo.innerHTML = (equipo || []).map(e => `
-      <tr>
-        <td><b>${e.nombre}</b></td>
-        <td><span class="estado-pill estado-${e.estado}">${e.estado.replace('_', ' ')}</span></td>
-        <td>${(e.horasHoy || 0).toFixed(1)}h</td>
-        <td>${e.obra || '—'}</td>
-      </tr>
-    `).join('') || '<tr><td colspan="4">Sin datos</td></tr>';
-
-    // Populate Selects
-    const selInformeEmp = document.getElementById('informe-empleado-sel');
-    selInformeEmp.innerHTML = listaEmpleadosGlobal.map(e => `<option value="${e.id}">${e.nombre}</option>`).join('');
-
-    const selAsigEmp = document.getElementById('asignar-empleado');
-    selAsigEmp.innerHTML = listaEmpleadosGlobal.map(e => `<option value="${e.id}">${e.nombre}</option>`).join('');
-
-    const selAsigObra = document.getElementById('asignar-obra');
-    selAsigObra.innerHTML = (obras || []).map(o => `<option value="${o.id}">${o.nombre}</option>`).join('');
-
-    // Render Obras
-    document.getElementById('tabla-obras').innerHTML = (obras || []).map(o => `
-      <tr><td><b>${o.nombre}</b></td><td>${o.direccion}</td><td><span class="estado-pill estado-TRABAJANDO">ACTIVA</span></td></tr>
-    `).join('') || '<tr><td colspan="3">Sin obras</td></tr>';
-
-    // Render Correcciones
-    document.getElementById('tabla-correcciones').innerHTML = (correcciones || []).map(c => `
-      <tr>
-        <td><b>${c.empleadoNombre}</b></td>
-        <td>${c.fecha} ${c.hora}</td>
-        <td>${c.tipo}</td>
-        <td>${c.motivo}</td>
-        <td>
-          <button class="btn btn-primario" style="padding:4px 8px; font-size:11px;" onclick="resolverCorr('${c.id}', 'APROBADA')">Aprobar</button>
-          <button class="btn btn-oscuro" style="padding:4px 8px; font-size:11px;" onclick="resolverCorr('${c.id}', 'RECHAZADA')">Rechazar</button>
-        </td>
-      </tr>
-    `).join('') || '<tr><td colspan="5" style="text-align:center;">Sin correcciones pendientes</td></tr>';
-
-    // Render Auditoria
-    document.getElementById('tabla-auditoria').innerHTML = (auditoria || []).map(a => `
-      <tr>
-        <td>${new Date(a.fecha).toLocaleString('es-ES')}</td>
-        <td><b>${a.usuario}</b></td>
-        <td>${a.rol}</td>
-        <td>${a.accion}</td>
-        <td>${a.detalle || '—'}</td>
-      </tr>
-    `).join('') || '<tr><td colspan="5">Sin auditoría</td></tr>';
-
-    // Auto-fetch report on admin tab load
-    if (listaEmpleadosGlobal.length > 0) {
-      cargarDatosInformeConFichajesReales();
-    }
-
-  } catch (e) {
-    console.error('Error cargando admin:', e);
+  }catch(e){
+    mostrarToast(e.message,'err');
   }
 }
 
-async function resolverCorr(id, estado) {
-  try {
-    await api('adminResolverCorreccion', { correccionId: id, estado });
-    cargarAdmin();
-  } catch (e) { alert(e.message); }
+async function cargarResumenHoy(){
+  const r = await api('resumenHoy');
+
+  const estadoTexto = {
+    SIN_FICHAR:'Sin fichar',
+    TRABAJANDO:'Trabajando',
+    EN_PAUSA:'En pausa',
+    FINALIZADO:'Jornada finalizada'
+  }[r.estado] || r.estado;
+
+  $('estadoHoy').textContent = estadoTexto;
+  $('estadoHoy').className = 'status ' + (
+    r.estado === 'TRABAJANDO' ? 'ok' :
+    r.estado === 'EN_PAUSA' ? 'warn' :
+    r.estado === 'FINALIZADO' ? 'info' : 'bad'
+  );
+
+  $('horasHoy').textContent = Number(r.horasTrabajadas).toFixed(2) + ' h';
+  $('pausaHoy').textContent = Number(r.horasPausa).toFixed(2) + ' h';
+
+  actualizarBotones(r.estado);
+
+  $('fichajesHoy').innerHTML = r.fichajesHoy.length
+    ? '<div class="table-wrap"><table><thead><tr><th>Tipo</th><th>Hora</th><th>Ubicación</th></tr></thead><tbody>' +
+      r.fichajesHoy.map(f =>
+        '<tr><td>'+escapeHtml(etiqueta(f.tipo))+'</td><td>'+escapeHtml(f.hora)+'</td><td>' +
+        (f.lat != null ? escapeHtml(Number(f.lat).toFixed(5)+', '+Number(f.lng).toFixed(5)) : '—') +
+        '</td></tr>'
+      ).join('') +
+      '</tbody></table></div>'
+    : '<div class="empty">Todavía no hay fichajes hoy.</div>';
 }
 
-async function cargarDatosInformeConFichajesReales() {
-  const empleadoId = document.getElementById('informe-empleado-sel').value;
-  const mes = parseInt(document.getElementById('informe-mes-sel').value, 10);
-  const anio = parseInt(document.getElementById('informe-anio-sel').value, 10);
+function etiqueta(tipo){
+  return {
+    entrada:'Entrada',
+    pausa_inicio:'Inicio de pausa',
+    pausa_fin:'Fin de pausa',
+    salida:'Salida'
+  }[tipo] || tipo;
+}
 
-  if (!empleadoId) return;
+function actualizarBotones(estado){
+  $('btnEntrada').disabled = estado !== 'SIN_FICHAR';
+  $('btnPausaInicio').disabled = estado !== 'TRABAJANDO';
+  $('btnPausaFin').disabled = estado !== 'EN_PAUSA';
+  $('btnSalida').disabled = estado !== 'TRABAJANDO';
+}
 
-  const btnGen = document.querySelector('button[onclick="cargarDatosInformeConFichajesReales()"]');
-  if (btnGen) {
-    btnGen.disabled = true;
-    btnGen.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Filtrando Fichajes Reales...';
+async function obtenerUbicacion(){
+  if(!navigator.geolocation){
+    throw new Error('Este navegador no permite obtener la ubicación.');
   }
 
-  try {
-    // Obtain audit log events which store exact punch history
-    const auditoria = await api('adminAuditoria');
-    
-    // Target employee name
-    const empObj = listaEmpleadosGlobal.find(e => e.id === empleadoId);
-    const empNombre = empObj ? empObj.nombre : 'Empleado';
+  return new Promise((resolve,reject)=>{
+    navigator.geolocation.getCurrentPosition(
+      pos => resolve({
+        lat:pos.coords.latitude,
+        lng:pos.coords.longitude,
+        precision:pos.coords.accuracy
+      }),
+      err => {
+        const mensajes = {
+          1:'Permiso de ubicación denegado.',
+          2:'No se pudo obtener la ubicación.',
+          3:'La ubicación tardó demasiado.'
+        };
+        reject(new Error(mensajes[err.code] || 'No se pudo obtener la ubicación.'));
+      },
+      {enableHighAccuracy:true,timeout:15000,maximumAge:0}
+    );
+  });
+}
 
-    // Group real events by date strictly
-    const eventosPorFecha = {};
+async function hacerFichaje(tipo){
+  try{
+    if(!confirm('¿Confirmar '+etiqueta(tipo).toLowerCase()+'?')) return;
 
-    (auditoria || []).forEach(log => {
-      if (!log.fecha) return;
-      const d = new Date(log.fecha);
-      if (isNaN(d.getTime())) return;
+    document.querySelectorAll('.punch').forEach(b=>b.disabled=true);
 
-      const logMes = d.getMonth() + 1;
-      const logAnio = d.getFullYear();
+    const ubicacion = await obtenerUbicacion();
 
-      // Match employee user name and requested month/year
-      const matchUsuario = (log.usuario && empObj && log.usuario.toLowerCase() === empObj.usuario.toLowerCase());
-      if (matchUsuario && logMes === mes && logAnio === anio) {
-        const fechaKey = d.toISOString().split('T')[0];
-        if (!eventosPorFecha[fechaKey]) eventosPorFecha[fechaKey] = [];
-        
-        eventosPorFecha[fechaKey].push({
-          accion: log.accion,
-          hora: d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-          timestamp: d.getTime()
-        });
-      }
+    await api('fichar',{
+      tipo,
+      lat:ubicacion.lat,
+      lng:ubicacion.lng,
+      precision:ubicacion.precision
     });
 
-    // Process only strictly real dates into table rows
-    datosInformeActual = [];
-    let totalHorasNum = 0;
-    let totalPausasNum = 0;
-
-    Object.keys(eventosPorFecha).sort().forEach(fechaKey => {
-      const evs = eventosPorFecha[fechaKey].sort((a,b) => a.timestamp - b.timestamp);
-      
-      let horaEntrada = '—';
-      let horaSalida = '—';
-      let minutosPausa = 0;
-
-      let tempPausaInicio = null;
-      let primerTimestamp = null;
-      let ultimoTimestamp = null;
-
-      evs.forEach(ev => {
-        const acc = ev.accion.toLowerCase();
-        if (acc.includes('entrada') || acc.includes('fichaje_entrada')) {
-          if (horaEntrada === '—') {
-            horaEntrada = ev.hora;
-            primerTimestamp = ev.timestamp;
-          }
-        } else if (acc.includes('salida') || acc.includes('fichaje_salida')) {
-          horaSalida = ev.hora;
-          ultimoTimestamp = ev.timestamp;
-        } else if (acc.includes('pausa_inicio')) {
-          tempPausaInicio = ev.timestamp;
-        } else if (acc.includes('pausa_fin') && tempPausaInicio) {
-          minutosPausa += Math.round((ev.timestamp - tempPausaInicio) / 60000);
-          tempPausaInicio = null;
-        }
-      });
-
-      // Calculate worked duration strictly
-      let horasTrabajadas = 0;
-      if (primerTimestamp && ultimoTimestamp && ultimoTimestamp > primerTimestamp) {
-        const minTotales = (ultimoTimestamp - primerTimestamp) / 60000;
-        horasTrabajadas = Math.max(0, (minTotales - minutosPausa) / 60);
-      } else if (horaEntrada !== '—') {
-        // Fallback default standard duration for isolated punch entries
-        horasTrabajadas = 8.0;
-      }
-
-      totalHorasNum += horasTrabajadas;
-      totalPausasNum += (minutosPausa / 60);
-
-      datosInformeActual.push({
-        fecha: fechaKey,
-        entrada: horaEntrada,
-        pausa: minutosPausa > 0 ? `${(minutosPausa/60).toFixed(1)}h` : '0.0h',
-        salida: horaSalida,
-        totalHoras: horasTrabajadas.toFixed(1) + 'h',
-        totalHorasNum: horasTrabajadas
-      });
-    });
-
-    // Render Preview Table strictly with real dates
-    const tbody = document.getElementById('tabla-previa-informe');
-    const lblConteo = document.getElementById('lbl-conteo-registros');
-    tbody.innerHTML = '';
-
-    lblConteo.textContent = `${datosInformeActual.length} registros reales`;
-
-    if (datosInformeActual.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--neon-amber); padding:20px;">No existen registros reales de fichajes para ${empNombre} en el mes seleccionado.</td></tr>`;
-    } else {
-      datosInformeActual.forEach(r => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><b>${r.fecha}</b></td>
-          <td>${r.entrada}</td>
-          <td>${r.pausa}</td>
-          <td>${r.salida}</td>
-          <td><b style="color:var(--neon-cyan);">${r.totalHoras}</b></td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    // Update KPI UI
-    document.getElementById('kpi-total-horas').textContent = totalHorasNum.toFixed(1) + 'h';
-    document.getElementById('kpi-dias-trabajados').textContent = datosInformeActual.length;
-    document.getElementById('kpi-total-pausas').textContent = totalPausasNum.toFixed(1) + 'h';
-    document.getElementById('kpi-promedio-diario').textContent = datosInformeActual.length > 0 ? (totalHorasNum / datosInformeActual.length).toFixed(1) + 'h' : '0.0h';
-
-    // Render Analytics Chart
-    renderizarGraficoReportes();
-
-  } catch (e) {
-    console.error(e);
-    mostrarError('error-fichaje', 'Error filtrando informe: ' + e.message);
-  } finally {
-    if (btnGen) {
-      btnGen.disabled = false;
-      btnGen.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> Generar Informe con Fichajes Reales';
-    }
+    mostrarToast(etiqueta(tipo)+' registrada correctamente');
+    await cargarResumenHoy();
+  }catch(e){
+    mostrarToast(e.message,'err');
+    await cargarResumenHoy().catch(()=>{});
   }
 }
 
-function renderizarGraficoReportes() {
-  const ctx = document.getElementById('chartReportes');
-  if (!ctx) return;
+async function cargarMiObra(){
+  const obra = await api('miObra');
 
-  if (chartInstance) chartInstance.destroy();
+  $('miObra').innerHTML = obra
+    ? '<strong>'+escapeHtml(obra.nombre)+'</strong><div class="muted" style="margin-top:6px">'+escapeHtml(obra.direccion || 'Sin dirección')+'</div><div style="margin-top:8px"><span class="status ok">'+escapeHtml(obra.estado)+'</span></div>'
+    : '<div class="empty">No tienes ninguna obra asignada.</div>';
+}
 
-  const labels = datosInformeActual.map(d => d.fecha.slice(5));
-  const dataValues = datosInformeActual.map(d => d.totalHorasNum);
+async function enviarCorreccion(){
+  try{
+    const fecha = $('corrFecha').value;
+    const tipoSolicitado = $('corrTipo').value;
+    const horaSolicitada = $('corrHora').value;
+    const motivo = $('corrMotivo').value.trim();
 
-  chartInstance = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: labels.length > 0 ? labels : ['Sin datos'],
-      datasets: [{
-        label: 'Horas Reales Trabajadas',
-        data: dataValues.length > 0 ? dataValues : [0],
-        backgroundColor: 'rgba(0, 242, 254, 0.6)',
-        borderColor: '#00F2FE',
-        borderWidth: 1,
-        borderRadius: 4
+    await api('solicitarCorreccion',{
+      fecha,tipoSolicitado,horaSolicitada,motivo
+    });
+
+    $('corrMotivo').value='';
+    $('corrHora').value='';
+    mostrarToast('Solicitud enviada');
+    await cargarMisCorrecciones();
+  }catch(e){
+    mostrarToast(e.message,'err');
+  }
+}
+
+async function cargarMisCorrecciones(){
+  const data = await api('misCorrecciones');
+
+  $('misCorrecciones').innerHTML = data.length
+    ? '<div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Hora</th><th>Estado</th><th>Respuesta</th></tr></thead><tbody>'+
+      data.map(c =>
+        '<tr><td>'+escapeHtml(c.fecha)+'</td><td>'+escapeHtml(etiqueta(c.tipoSolicitado))+'</td><td>'+escapeHtml(c.horaSolicitada)+'</td><td>'+estadoPill(c.estado)+'</td><td>'+escapeHtml(c.respuestaAdmin || '—')+'</td></tr>'
+      ).join('')+
+      '</tbody></table></div>'
+    : '<div class="empty">No tienes solicitudes.</div>';
+}
+
+function estadoPill(estado){
+  const cls =
+    estado === 'aprobada' || estado === 'COMPLETA' ? 'ok' :
+    estado === 'pendiente' || estado === 'INCOMPLETA' ? 'warn' : 'bad';
+  return '<span class="status '+cls+'">'+escapeHtml(estado)+'</span>';
+}
+
+async function cargarNotificaciones(){
+  const data = await api('misNotificaciones');
+
+  $('misNotificaciones').innerHTML = data.length
+    ? data.map(n =>
+      '<div style="padding:12px 0;border-bottom:1px solid var(--border)">'+
+      '<div style="display:flex;justify-content:space-between;gap:10px"><strong>'+escapeHtml(n.titulo)+'</strong>'+
+      (!n.leida ? '<span class="status info">Nueva</span>' : '')+'</div>'+
+      '<div class="muted small" style="margin-top:4px">'+escapeHtml(n.mensaje)+'</div>'+
+      '<button class="btn small" style="margin-top:8px" onclick="marcarLeida(\''+escapeHtml(n.id)+'\')">Marcar como leída</button>'+
+      '</div>'
+    ).join('')
+    : '<div class="empty">No hay notificaciones.</div>';
+}
+
+async function marcarLeida(id){
+  try{
+    await api('marcarNotificacionLeida',{notifId:id});
+    await cargarNotificaciones();
+  }catch(e){mostrarToast(e.message,'err')}
+}
+
+// ============================================================
+// ADMIN
+// ============================================================
+
+async function cargarAdminInicial(){
+  await cambiarAdminTab('equipo');
+}
+
+async function cambiarAdminTab(tab){
+  document.querySelectorAll('.admin-tab').forEach(el=>el.classList.add('hidden'));
+  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
+
+  $('admin-'+tab).classList.remove('hidden');
+  const button = document.querySelector('.tab[data-tab="'+tab+'"]');
+  if(button) button.classList.add('active');
+
+  if(adminTabLoaded[tab]) return;
+
+  try{
+    if(tab==='equipo') await cargarAdminEquipo();
+    if(tab==='obras') await cargarAdminObras();
+    if(tab==='correcciones') await cargarAdminCorrecciones();
+    if(tab==='informes') await cargarAdminInformes();
+    if(tab==='auditoria') await cargarAdminAuditoria();
+
+    adminTabLoaded[tab]=true;
+  }catch(e){
+    mostrarToast(e.message,'err');
+  }
+}
+
+async function cargarAdminEquipo(){
+  const [equipo,emps,obs] = await Promise.all([
+    api('adminEstadoEquipo'),
+    api('adminListEmpleados'),
+    api('adminListObras')
+  ]);
+
+  empleados=emps;
+  obras=obs;
+
+  $('admin-equipo').innerHTML =
+    '<div class="grid grid-4">'+
+      '<div class="card"><div class="kpi-label">Empleados</div><div class="kpi">'+emps.filter(e=>e.activo).length+'</div></div>'+
+      '<div class="card"><div class="kpi-label">Trabajando</div><div class="kpi">'+equipo.filter(e=>e.estado==='TRABAJANDO').length+'</div></div>'+
+      '<div class="card"><div class="kpi-label">En pausa</div><div class="kpi">'+equipo.filter(e=>e.estado==='EN_PAUSA').length+'</div></div>'+
+      '<div class="card"><div class="kpi-label">Finalizados</div><div class="kpi">'+equipo.filter(e=>e.estado==='FINALIZADO').length+'</div></div>'+
+    '</div>'+
+    '<div class="card" style="margin-top:18px">'+
+      '<div class="toolbar">'+
+        '<div class="field"><label>Buscar empleado</label><input id="equipoBuscar" placeholder="Nombre o usuario" oninput="filtrarEquipo()"></div>'+
+        '<button class="btn primary" onclick="abrirCrearEmpleado()">Nuevo empleado</button>'+
+      '</div>'+
+      '<div id="equipoTabla"></div>'+
+    '</div>';
+
+  window.estadoEquipo=equipo;
+  renderEquipo();
+}
+
+function filtrarEquipo(){ renderEquipo(); }
+
+function renderEquipo(){
+  const q = ($('equipoBuscar')?.value || '').toLowerCase();
+
+  const rows = (window.estadoEquipo || []).filter(e=>{
+    return !q ||
+      e.nombre.toLowerCase().includes(q) ||
+      (e.usuario || '').toLowerCase().includes(q);
+  });
+
+  $('equipoTabla').innerHTML =
+    '<div class="table-wrap"><table><thead><tr><th>Empleado</th><th>Usuario</th><th>Estado</th><th>Horas hoy</th></tr></thead><tbody>'+
+    (rows.length ? rows.map(e =>
+      '<tr><td><strong>'+escapeHtml(e.nombre)+'</strong></td><td>'+escapeHtml(e.usuario || '')+'</td><td>'+estadoPill(e.estado)+'</td><td>'+Number(e.horasTrabajadas||0).toFixed(2)+' h</td></tr>'
+    ).join('') : '<tr><td colspan="4" class="empty">Sin resultados</td></tr>')+
+    '</tbody></table></div>';
+}
+
+function abrirCrearEmpleado(){
+  abrirModal(
+    '<h2>Crear empleado</h2>'+
+    '<div class="grid grid-2">'+
+      '<div class="field"><label>Nombre</label><input id="newNombre"></div>'+
+      '<div class="field"><label>Usuario</label><input id="newUsuario"></div>'+
+      '<div class="field"><label>Contraseña</label><input id="newPassword" type="password"></div>'+
+      '<div class="field"><label>Rol</label><select id="newRol"><option value="empleado">Empleado</option><option value="admin">Administrador</option></select></div>'+
+    '</div>'+
+    '<button class="btn primary" style="margin-top:15px" onclick="crearEmpleado()">Crear</button>'
+  );
+}
+
+async function crearEmpleado(){
+  try{
+    await api('adminCrearEmpleado',{
+      nombre:$('newNombre').value.trim(),
+      usuario:$('newUsuario').value.trim(),
+      password:$('newPassword').value,
+      rol:$('newRol').value
+    });
+
+    cerrarModal();
+    mostrarToast('Empleado creado');
+    adminTabLoaded={};
+    await cargarAdminEquipo();
+    adminTabLoaded.equipo=true;
+  }catch(e){mostrarToast(e.message,'err')}
+}
+
+async function cargarAdminObras(){
+  const [obs,emps] = await Promise.all([
+    api('adminListObras'),
+    api('adminListEmpleados')
+  ]);
+
+  obras=obs;
+  empleados=emps;
+
+  $('admin-obras').innerHTML =
+    '<div class="grid grid-2">'+
+      '<div class="card">'+
+        '<h2>Nueva obra</h2>'+
+        '<div class="field"><label>Nombre</label><input id="obraNombre"></div>'+
+        '<div class="field" style="margin-top:10px"><label>Dirección</label><input id="obraDireccion"></div>'+
+        '<button class="btn primary" style="margin-top:12px" onclick="crearObra()">Crear obra</button>'+
+      '</div>'+
+      '<div class="card">'+
+        '<h2>Asignar obra</h2>'+
+        '<div class="field"><label>Empleado</label><select id="asigEmpleado">'+empleados.filter(e=>e.activo).map(e=>'<option value="'+e.id+'">'+escapeHtml(e.nombre)+'</option>').join('')+'</select></div>'+
+        '<div class="field" style="margin-top:10px"><label>Obra</label><select id="asigObra">'+obs.map(o=>'<option value="'+o.id+'">'+escapeHtml(o.nombre)+'</option>').join('')+'</select></div>'+
+        '<button class="btn blue" style="margin-top:12px" onclick="asignarObra()">Asignar</button>'+
+      '</div>'+
+    '</div>'+
+    '<div class="card" style="margin-top:18px"><h2>Obras</h2><div class="table-wrap"><table><thead><tr><th>Obra</th><th>Dirección</th><th>Estado</th><th>Empleados</th></tr></thead><tbody>'+
+    obs.map(o=>{
+      const n=empleados.filter(e=>e.obraId===o.id && e.activo).length;
+      return '<tr><td><strong>'+escapeHtml(o.nombre)+'</strong></td><td>'+escapeHtml(o.direccion||'—')+'</td><td>'+estadoPill(o.estado)+'</td><td>'+n+'</td></tr>';
+    }).join('')+
+    '</tbody></table></div></div>';
+}
+
+async function crearObra(){
+  try{
+    await api('adminCrearObra',{
+      nombre:$('obraNombre').value.trim(),
+      direccion:$('obraDireccion').value.trim()
+    });
+    mostrarToast('Obra creada');
+    adminTabLoaded={};
+    await cargarAdminObras();
+    adminTabLoaded.obras=true;
+  }catch(e){mostrarToast(e.message,'err')}
+}
+
+async function asignarObra(){
+  try{
+    await api('adminAsignarObra',{
+      empleadoId:$('asigEmpleado').value,
+      obraId:$('asigObra').value
+    });
+    mostrarToast('Obra asignada');
+    adminTabLoaded={};
+    await cargarAdminObras();
+    adminTabLoaded.obras=true;
+  }catch(e){mostrarToast(e.message,'err')}
+}
+
+async function cargarAdminCorrecciones(){
+  correcciones=await api('adminListCorrecciones');
+
+  $('admin-correcciones').innerHTML =
+    '<div class="card">'+
+      '<div class="toolbar">'+
+        '<div class="field"><label>Filtrar estado</label><select id="corrFiltro" onchange="renderCorrecciones()"><option value="">Todas</option><option value="pendiente">Pendientes</option><option value="aprobada">Aprobadas</option><option value="rechazada">Rechazadas</option></select></div>'+
+        '<div class="field"><label>Buscar</label><input id="corrBuscar" oninput="renderCorrecciones()" placeholder="Fecha, empleado, motivo"></div>'+
+      '</div>'+
+      '<div id="correccionesTabla"></div>'+
+    '</div>';
+
+  renderCorrecciones();
+}
+
+function renderCorrecciones(){
+  const filtro=$('corrFiltro')?.value||'';
+  const q=($('corrBuscar')?.value||'').toLowerCase();
+
+  const rows=correcciones.filter(c=>{
+    const emp=empleados.find(e=>e.id===c.empleadoId);
+    const texto=(emp?.nombre||c.empleadoId)+' '+c.fecha+' '+c.motivo;
+    return (!filtro||c.estado===filtro)&&(!q||texto.toLowerCase().includes(q));
+  });
+
+  $('correccionesTabla').innerHTML =
+    '<div class="table-wrap"><table><thead><tr><th>Empleado</th><th>Fecha</th><th>Solicitud</th><th>Motivo</th><th>Estado</th><th>Acción</th></tr></thead><tbody>'+
+    (rows.length ? rows.map(c=>{
+      const emp=empleados.find(e=>e.id===c.empleadoId);
+      return '<tr>'+
+        '<td>'+escapeHtml(emp?.nombre||c.empleadoId)+'</td>'+
+        '<td>'+escapeHtml(c.fecha)+'</td>'+
+        '<td>'+escapeHtml(etiqueta(c.tipoSolicitado))+' · '+escapeHtml(c.horaSolicitada)+'</td>'+
+        '<td>'+escapeHtml(c.motivo||'—')+'</td>'+
+        '<td>'+estadoPill(c.estado)+'</td>'+
+        '<td>'+(c.estado==='pendiente'
+          ? '<div class="actions"><button class="btn success" onclick="resolverCorreccion(\''+c.id+'\',true)">Aprobar</button><button class="btn danger" onclick="resolverCorreccion(\''+c.id+'\',false)">Rechazar</button></div>'
+          : escapeHtml(c.respuestaAdmin||'—'))+
+      '</td></tr>';
+    }).join('') : '<tr><td colspan="6" class="empty">No hay solicitudes.</td></tr>')+
+    '</tbody></table></div>';
+}
+
+async function resolverCorreccion(id, aprobar){
+  const respuesta=prompt(aprobar?'Respuesta opcional al empleado:':'Motivo del rechazo:','');
+  if(respuesta===null) return;
+
+  try{
+    await api('adminResolverCorreccion',{
+      correccionId:id,
+      aprobar,
+      respuesta
+    });
+    mostrarToast(aprobar?'Corrección aprobada':'Corrección rechazada');
+    correcciones=await api('adminListCorrecciones');
+    renderCorrecciones();
+  }catch(e){mostrarToast(e.message,'err')}
+}
+
+// ============================================================
+// INFORMES — FUENTE REAL: FICHAJES
+// ============================================================
+
+async function cargarAdminInformes(){
+  const emps=await api('adminListEmpleados');
+  empleados=emps;
+
+  const ahora=new Date();
+
+  $('admin-informes').innerHTML =
+    '<div class="card">'+
+      '<div class="report-header">'+
+        '<div><h2>Informes de jornada</h2><div class="muted small">Los datos se calculan directamente desde la hoja Fichajes.</div></div>'+
+        '<div class="actions no-print"><button class="btn blue" onclick="imprimirInforme()">Imprimir / PDF</button><button class="btn" onclick="descargarPDFServidor()">Generar PDF</button></div>'+
+      '</div>'+
+      '<div class="toolbar no-print">'+
+        '<div class="field"><label>Empleado</label><select id="informeEmpleado">'+
+          emps.filter(e=>e.activo).map(e=>'<option value="'+e.id+'">'+escapeHtml(e.nombre)+' ('+escapeHtml(e.usuario)+')</option>').join('')+
+        '</select></div>'+
+        '<div class="field small-field"><label>Mes</label><select id="informeMes">'+
+          Array.from({length:12},(_,i)=>'<option value="'+(i+1)+'" '+((i+1)===ahora.getMonth()+1?'selected':'')+'>'+nombreMes(i+1)+'</option>').join('')+
+        '</select></div>'+
+        '<div class="field small-field"><label>Año</label><select id="informeAnio">'+
+          Array.from({length:5},(_,i)=>{const y=ahora.getFullYear()-2+i;return '<option value="'+y+'" '+(y===ahora.getFullYear()?'selected':'')+'>'+y+'</option>'}).join('')+
+        '</select></div>'+
+        '<button class="btn primary" onclick="generarInforme()">Generar informe</button>'+
+      '</div>'+
+    '</div>'+
+    '<div id="informeResultado" style="margin-top:18px"></div>';
+
+  await generarInforme();
+}
+
+function nombreMes(m){
+  return ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'][m-1];
+}
+
+async function generarInforme(){
+  try{
+    const empleadoId=$('informeEmpleado').value;
+    const mes=Number($('informeMes').value);
+    const anio=Number($('informeAnio').value);
+
+    informeActual=await api('adminInforme',{
+      empleadoId,mes,anio
+    });
+
+    renderInforme();
+  }catch(e){mostrarToast(e.message,'err')}
+}
+
+function renderInforme(){
+  const r=informeActual;
+  const s=r.resumen;
+
+  $('informeResultado').innerHTML =
+    '<div class="card" id="reportPrintArea">'+
+      '<div class="report-header">'+
+        '<div><h2>'+escapeHtml(r.empleado.nombre)+'</h2><div class="muted">'+escapeHtml(nombreMes(r.periodo.mes)+' '+r.periodo.anio)+' · '+escapeHtml(r.empleado.usuario)+'</div></div>'+
+        '<div>'+estadoPill(s.incidencias ? 'INCIDENCIA' : 'OK')+'</div>'+
+      '</div>'+
+      '<div class="report-kpis">'+
+        '<div class="report-kpi"><div class="kpi-label">Horas</div><div class="value">'+s.horasTrabajadas.toFixed(2)+' h</div></div>'+
+        '<div class="report-kpi"><div class="kpi-label">Pausas</div><div class="value">'+s.horasPausa.toFixed(2)+' h</div></div>'+
+        '<div class="report-kpi"><div class="kpi-label">Días registrados</div><div class="value">'+s.diasConFichajes+'</div></div>'+
+        '<div class="report-kpi"><div class="kpi-label">Completos</div><div class="value">'+s.diasCompletos+'</div></div>'+
+        '<div class="report-kpi"><div class="kpi-label">Incidencias</div><div class="value">'+(s.incompletos+s.incidencias)+'</div></div>'+
+      '</div>'+
+      '<div id="reportChartWrap" style="margin-top:22px"><canvas id="reportChart"></canvas></div>'+
+      '<div style="margin-top:22px" class="table-wrap">'+
+        '<table class="report-table"><thead><tr><th>Fecha</th><th>Entrada</th><th>Salida</th><th>Trabajo</th><th>Pausa</th><th>Estado</th><th>Incidencias</th></tr></thead><tbody>'+
+        (r.dias.length ? r.dias.map(d=>{
+          const entrada=d.eventos.find(e=>e.tipo==='entrada');
+          const salida=d.eventos.filter(e=>e.tipo==='salida').slice(-1)[0];
+          return '<tr>'+
+            '<td>'+escapeHtml(d.fecha)+'</td>'+
+            '<td>'+escapeHtml(entrada?.hora||'—')+'</td>'+
+            '<td>'+escapeHtml(salida?.hora||'—')+'</td>'+
+            '<td>'+Number(d.horas).toFixed(2)+' h</td>'+
+            '<td>'+Number(d.horasPausa).toFixed(2)+' h</td>'+
+            '<td>'+estadoPill(d.estado)+'</td>'+
+            '<td>'+(d.anomalias.length ? d.anomalias.map(a=>'<div class="anomaly">'+escapeHtml(a)+'</div>').join('') : '<span class="muted">—</span>')+'</td>'+
+          '</tr>';
+        }).join('') : '<tr><td colspan="7" class="empty">No existen fichajes en este periodo.</td></tr>')+
+        '</tbody></table>'+
+      '</div>'+
+      '<div class="muted small" style="margin-top:14px">Fuente: hoja Fichajes · cálculo realizado en servidor · zona horaria Europe/Madrid.</div>'+
+    '</div>';
+
+  dibujarGrafico(r);
+}
+
+function dibujarGrafico(r){
+  const canvas=$('reportChart');
+  if(!canvas) return;
+
+  if(chart) chart.destroy();
+
+  chart=new Chart(canvas,{
+    type:'bar',
+    data:{
+      labels:r.dias.map(d=>d.fecha.slice(8)),
+      datasets:[{
+        label:'Horas trabajadas',
+        data:r.dias.map(d=>d.horas)
       }]
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false }
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{display:false}
       },
-      scales: {
-        y: {
-          beginAtZero: true,
-          grid: { color: 'rgba(255,255,255,0.05)' },
-          ticks: { color: '#9CA3AF' }
-        },
-        x: {
-          grid: { display: false },
-          ticks: { color: '#9CA3AF' }
-        }
+      scales:{
+        y:{beginAtZero:true,title:{display:true,text:'Horas'}}
       }
     }
   });
 }
 
-function abrirPrevisualizacionDocumento() {
-  const empId = document.getElementById('informe-empleado-sel').value;
-  const mesIdx = document.getElementById('informe-mes-sel').value;
-  const mesNombre = document.getElementById('informe-mes-sel').options[document.getElementById('informe-mes-sel').selectedIndex].text;
-  const anio = document.getElementById('informe-anio-sel').value;
+function imprimirInforme(){
+  if(!informeActual) return;
+  window.print();
+}
 
-  const empObj = listaEmpleadosGlobal.find(e => e.id === empId);
-  const empNombre = empObj ? empObj.nombre : 'Empleado';
+async function descargarPDFServidor(){
+  try{
+    if(!informeActual) throw new Error('Genera primero un informe');
 
-  const container = document.getElementById('contenido-documento-a4');
-  
-  let filasHtml = '';
-  let sumaHoras = 0;
-
-  if (datosInformeActual.length === 0) {
-    filasHtml = `<tr><td colspan="5" style="padding:15px; text-align:center;">No constan registros de fichajes reales en la base de datos para este periodo.</td></tr>`;
-  } else {
-    datosInformeActual.forEach(r => {
-      sumaHoras += r.totalHorasNum;
-      filasHtml += `
-        <tr>
-          <td>${r.fecha}</td>
-          <td>${r.entrada}</td>
-          <td>${r.pausa}</td>
-          <td>${r.salida}</td>
-          <td><b>${r.totalHoras}</b></td>
-        </tr>
-      `;
+    const data=await api('adminResumenMensualPDF',{
+      empleadoId:informeActual.empleado.id,
+      mes:informeActual.periodo.mes,
+      anio:informeActual.periodo.anio
     });
-  }
 
-  container.innerHTML = `
-    <div class="doc-header">
-      <div>
-        <div class="doc-title">INFORME OFICIAL DE REGISTRO DE JORNADA</div>
-        <div class="doc-subtitle">DuarteCobos y Asociados S.L.</div>
-      </div>
-      <div class="doc-meta-right">
-        <b>Periodo:</b> ${mesNombre} ${anio}<br>
-        <b>Fecha Emisión:</b> ${new Date().toLocaleDateString('es-ES')}
-      </div>
-    </div>
+    const bytes=atob(data.base64);
+    const arr=new Uint8Array(bytes.length);
+    for(let i=0;i<bytes.length;i++) arr[i]=bytes.charCodeAt(i);
 
-    <div class="doc-grid-info">
-      <div class="doc-info-item"><b>Empresa:</b> DuarteCobos y Asociados S.L.</div>
-      <div class="doc-info-item"><b>Trabajador:</b> ${empNombre}</div>
-      <div class="doc-info-item"><b>Días Fichados:</b> ${datosInformeActual.length} días reales</div>
-      <div class="doc-info-item"><b>Total Horas:</b> ${sumaHoras.toFixed(1)} h</div>
-    </div>
+    const blob=new Blob([arr],{type:'application/pdf'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=data.nombreArchivo;
+    a.click();
+    URL.revokeObjectURL(url);
 
-    <table class="doc-table">
-      <thead>
-        <tr>
-          <th>Fecha</th>
-          <th>Hora Entrada</th>
-          <th>Tiempo Pausa</th>
-          <th>Hora Salida</th>
-          <th>Total Horas</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${filasHtml}
-      </tbody>
-    </table>
-
-    <div class="doc-kpi-summary">
-      <span>RESUMEN REGISTROS REALES EN BASE DE DATOS</span>
-      <span>TOTAL HORAS ORDINARIAS: ${sumaHoras.toFixed(1)} H</span>
-    </div>
-
-    <div style="font-size:9px; color:#555; margin-bottom:20px; line-height:1.3;">
-      Este documento contiene de forma estricta los registros horarios reales capturados en el sistema conforme al Real Decreto-ley 8/2019 de control horario.
-    </div>
-
-    <div class="doc-signatures">
-      <div class="sig-box">
-        <b>Firma del Trabajador</b>
-      </div>
-      <div class="sig-box">
-        <b>Firma Representante Empresa</b>
-      </div>
-    </div>
-  `;
-
-  document.getElementById('modal-preview-doc').classList.remove('oculto');
+    mostrarToast('PDF generado');
+  }catch(e){mostrarToast(e.message,'err')}
 }
 
-function cerrarPrevisualizacionDocumento() {
-  document.getElementById('modal-preview-doc').classList.add('oculto');
+// ============================================================
+// AUDITORÍA
+// ============================================================
+
+async function cargarAdminAuditoria(){
+  auditoria=await api('adminAuditoria',{limite:500});
+
+  $('admin-auditoria').innerHTML =
+    '<div class="card">'+
+      '<div class="toolbar">'+
+        '<div class="field"><label>Buscar</label><input id="audBuscar" oninput="renderAuditoria()" placeholder="Acción, actor o detalle"></div>'+
+        '<div class="field small-field"><label>Máximo</label><select id="audLimite" onchange="recargarAuditoria()"><option>100</option><option selected>500</option><option>1000</option></select></div>'+
+      '</div>'+
+      '<div id="audTabla"></div>'+
+    '</div>';
+
+  renderAuditoria();
 }
 
-function filtrarTabla(inputId, tablaId) {
-  const query = document.getElementById(inputId).value.toLowerCase();
-  const rows = document.querySelectorAll(`#${tablaId} tr`);
-  rows.forEach(row => {
-    row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
+async function recargarAuditoria(){
+  try{
+    auditoria=await api('adminAuditoria',{limite:Number($('audLimite').value)});
+    renderAuditoria();
+  }catch(e){mostrarToast(e.message,'err')}
+}
+
+function renderAuditoria(){
+  const q=($('audBuscar')?.value||'').toLowerCase();
+
+  const rows=auditoria.filter(a=>{
+    const texto=[a.actorId,a.rol,a.accion,a.detalle].join(' ').toLowerCase();
+    return !q||texto.includes(q);
   });
+
+  $('audTabla').innerHTML =
+    '<div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Actor</th><th>Rol</th><th>Acción</th><th>Detalle</th></tr></thead><tbody>'+
+    (rows.length ? rows.map(a=>
+      '<tr><td>'+escapeHtml(formatearFecha(a.timestamp))+'</td><td>'+escapeHtml(a.actorId)+'</td><td>'+escapeHtml(a.rol)+'</td><td>'+escapeHtml(a.accion)+'</td><td>'+escapeHtml(a.detalle||'')+'</td></tr>'
+    ).join('') : '<tr><td colspan="5" class="empty">No hay registros.</td></tr>')+
+    '</tbody></table></div>';
 }
 
-function exportarTablaCSV(tablaId, nombreArchivo) {
-  const table = document.getElementById(tablaId);
-  if (!table) return;
-  let csv = [];
-  for (let row of table.rows) {
-    let cols = Array.from(row.cells).map(c => `"${c.textContent.trim().replace(/"/g, '""')}"`);
-    csv.push(cols.join(','));
+function formatearFecha(v){
+  const d=new Date(v);
+  return isNaN(d)?String(v):d.toLocaleString('es-ES',{dateStyle:'short',timeStyle:'medium'});
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+
+function abrirModal(html){
+  $('modalContent').innerHTML=html;
+  $('modal').classList.remove('hidden');
+}
+
+function cerrarModal(e){
+  if(e && e.target !== $('modal')) return;
+  $('modal').classList.add('hidden');
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter' && !$('loginView').classList.contains('hidden')){
+    iniciarSesion();
   }
-  const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = nombreArchivo;
-  link.click();
-}
+});
 
-async function cargarNotificaciones() {
-  try {
-    const res = await api('misNotificaciones');
-    const badge = document.getElementById('badge-notif');
-    const lista = document.getElementById('lista-notificaciones');
+window.addEventListener('load',()=>{
+  sesion=cargarSesion();
 
-    const noLeidas = (res || []).filter(n => !n.leida).length;
-    if (noLeidas > 0) {
-      badge.textContent = noLeidas;
-      badge.classList.remove('oculto');
-    } else {
-      badge.classList.add('oculto');
-    }
-
-    if (lista) {
-      lista.innerHTML = (res || []).map(n => `
-        <div class="notif ${n.leida ? '' : 'no-leida'}">
-          <b>${n.titulo}</b>
-          <div>${n.mensaje}</div>
-          <small>${n.fecha}</small>
-        </div>
-      `).join('') || '<p style="color:var(--text-muted)">Sin notificaciones</p>';
-    }
-  } catch (e) {}
-}
+  if(sesion){
+    mostrarApp();
+  }
+});
 </script>
 </body>
 </html>
