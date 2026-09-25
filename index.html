@@ -87,36 +87,6 @@
     box-shadow: 0 0 12px var(--neon-cyan);
   }
 
-  .demo-switch-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: rgba(0, 242, 254, 0.06);
-    border: 1px solid rgba(0, 242, 254, 0.2);
-    padding: 8px 12px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    font-size: 12px;
-  }
-
-  .switch {
-    position: relative;
-    display: inline-block;
-    width: 40px;
-    height: 22px;
-  }
-  .switch input { opacity: 0; width: 0; height: 0; }
-  .slider {
-    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-    background-color: #374151; transition: .3s; border-radius: 22px;
-  }
-  .slider:before {
-    position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px;
-    background-color: white; transition: .3s; border-radius: 50%;
-  }
-  input:checked + .slider { background-color: var(--neon-cyan); }
-  input:checked + .slider:before { transform: translateX(18px); }
-
   .tarjeta-login h1 {
     font-size: 26px;
     margin: 0 0 6px;
@@ -453,7 +423,6 @@
 
 <div id="pantalla-login">
   <div class="tarjeta-login">
-
     <h1><i class="fa-solid fa-hard-hat" style="color:var(--neon-cyan)"></i> FICHA<span>OBRA</span></h1>
     <p>Control de obra y fichaje ultra rápido</p>
     
@@ -461,11 +430,11 @@
     
     <div class="campo">
       <label><i class="fa-solid fa-user"></i> Usuario</label>
-      <input type="text" id="input-usuario" placeholder="Ej: admin o empleado" value="admin" autocomplete="username">
+      <input type="text" id="input-usuario" placeholder="Ej: admin o empleado" autocomplete="username">
     </div>
     <div class="campo">
       <label><i class="fa-solid fa-lock"></i> Contraseña</label>
-      <input type="password" id="input-password" placeholder="••••••••" value="123456" autocomplete="current-password">
+      <input type="password" id="input-password" placeholder="••••••••" autocomplete="current-password">
     </div>
     <button class="btn btn-primario" id="btn-login"><i class="fa-solid fa-right-to-bracket"></i> Entrar al Sistema</button>
   </div>
@@ -681,28 +650,11 @@ setInterval(() => {
   }
 }, 1000);
 
-// Demo / Mock Data Store
-const mockData = {
-  estado: 'SIN_FICHAR',
-  horasTrabajadas: '0.0',
-  horasPausa: '0.0',
-  fichajesHoy: [],
-  notificaciones: [
-    { id: '1', titulo: 'Bienvenido a FICHAOBRA', mensaje: 'Sistema de fichajes iniciado correctamente.', fecha: new Date().toISOString(), leida: false },
-    { id: '2', titulo: 'Obra Asignada', mensaje: 'Se te ha asignado la Obra Centro Comercial San José.', fecha: new Date().toISOString(), leida: false }
-  ]
-};
-
-// Generic API caller with Optimistic fallback
+// API caller directly hitting Google Apps Script
 async function api(action, extra) {
-  const isDemo = document.getElementById('toggle-demo').checked;
-  if (isDemo) {
-    return responderDemo(action, extra);
-  }
-
   const cuerpo = Object.assign({ action: action, token: estadoApp.token }, extra || {});
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 6000);
+  const timeoutId = setTimeout(() => controller.abort(), 12000);
 
   try {
     const resp = await fetch(API_URL, {
@@ -717,78 +669,14 @@ async function api(action, extra) {
     return json.data;
   } catch (e) {
     clearTimeout(timeoutId);
-    console.warn("Error o Timeout en API, usando respuesta estimada local:", e.message);
-    return responderDemo(action, extra);
+    if (e.name === 'AbortError') {
+      throw new Error("Tiempo de espera agotado al conectar con el servidor.");
+    }
+    throw e;
   }
 }
 
-// Fast Mock Data Engine
-function responderDemo(action, extra) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      if (action === 'login') {
-        const u = extra.usuario.toLowerCase();
-        const esAdmin = u.includes('admin');
-        resolve({
-          token: 'token-demo-12345',
-          rol: esAdmin ? 'admin' : 'empleado',
-          nombre: esAdmin ? 'Administrador Obra' : 'Juan Operario',
-          empleadoId: 'emp-001'
-        });
-      } else if (action === 'fichar') {
-        const horaStr = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-        mockData.fichajesHoy.push({ tipo: extra.tipo, hora: horaStr });
-        
-        if (extra.tipo === 'entrada') mockData.estado = 'TRABAJANDO';
-        if (extra.tipo === 'pausa_inicio') mockData.estado = 'EN_PAUSA';
-        if (extra.tipo === 'pausa_fin') mockData.estado = 'TRABAJANDO';
-        if (extra.tipo === 'salida') mockData.estado = 'FINALIZADO';
-        
-        mockData.horasTrabajadas = (mockData.fichajesHoy.length * 0.5).toFixed(1);
-        
-        resolve({
-          estado: mockData.estado,
-          horasTrabajadas: mockData.horasTrabajadas,
-          horasPausa: mockData.horasPausa,
-          fichajesHoy: mockData.fichajesHoy
-        });
-      } else if (action === 'resumenHoy') {
-        resolve({
-          estado: mockData.estado,
-          horasTrabajadas: mockData.horasTrabajadas,
-          horasPausa: mockData.horasPausa,
-          fichajesHoy: mockData.fichajesHoy
-        });
-      } else if (action === 'miObra') {
-        resolve({ nombre: 'Residencial Bulevar - Fase 2', direccion: 'Av. de la Construcción 45', estado: 'EN PROGRESO' });
-      } else if (action === 'misNotificaciones') {
-        resolve(mockData.notificaciones);
-      } else if (action === 'misCorrecciones') {
-        resolve([{ fecha: new Date().toLocaleDateString('es-ES'), tipoSolicitado: 'entrada', estado: 'Pendiente' }]);
-      } else if (action === 'adminEstadoEquipo') {
-        resolve([
-          { empleadoId: 'emp-001', nombre: 'Juan Operario', estado: 'TRABAJANDO', horasTrabajadas: '4.2' },
-          { empleadoId: 'emp-002', nombre: 'Carlos Ruiz', estado: 'EN_PAUSA', horasTrabajadas: '3.5' }
-        ]);
-      } else if (action === 'adminListEmpleados') {
-        resolve([
-          { id: 'emp-001', nombre: 'Juan Operario', rol: 'empleado', obraId: 'o1' },
-          { id: 'emp-002', nombre: 'Carlos Ruiz', rol: 'empleado', obraId: 'o1' }
-        ]);
-      } else if (action === 'adminListObras') {
-        resolve([{ id: 'o1', nombre: 'Residencial Bulevar', direccion: 'Calle Mayor 12', estado: 'Activa' }]);
-      } else if (action === 'adminListCorrecciones') {
-        resolve([]);
-      } else if (action === 'adminAuditoria') {
-        resolve([{ timestamp: new Date().toISOString(), actorId: 'emp-001', rol: 'empleado', accion: 'Fichaje Entrada', detalle: 'GPS OK' }]);
-      } else {
-        resolve({});
-      }
-    }, 10);
-  });
-}
-
-// Ultra Fast GPS Location with Fallback
+// GPS Location with Fast Fallback
 function obtenerUbicacion() {
   return new Promise((resolve) => {
     if (!navigator.geolocation) {
@@ -799,7 +687,7 @@ function obtenerUbicacion() {
     const timeout = setTimeout(() => {
       if (!resolved) {
         resolved = true;
-        resolve({ lat: 40.416, lng: -3.703, precision: 50 }); // Fast fallback GPS
+        resolve({ lat: 40.416, lng: -3.703, precision: 50 });
       }
     }, 2500);
 
@@ -827,31 +715,27 @@ function mostrarError(id, mensaje) {
   const el = document.getElementById(id);
   el.textContent = mensaje;
   el.classList.remove('oculto');
-  setTimeout(() => el.classList.add('oculto'), 4000);
+  setTimeout(() => el.classList.add('oculto'), 5000);
 }
 
-// Instant Login Handler
+// Real Login Handler
 async function ejecutarLogin() {
   const usuario = document.getElementById('input-usuario').value.trim();
   const password = document.getElementById('input-password').value;
   const btn = document.getElementById('btn-login');
 
-  if (!usuario) { mostrarError('error-login', 'Por favor introduce un usuario'); return; }
+  if (!usuario || !password) { mostrarError('error-login', 'Por favor introduce usuario y contraseña'); return; }
 
   btn.disabled = true;
-  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Entrando...';
+  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Autenticando...';
 
   try {
-    const isDemo = document.getElementById('toggle-demo').checked;
-    const data = isDemo 
-      ? await responderDemo('login', { usuario, password })
-      : await apiSinToken('login', { usuario, password });
-
+    const data = await apiSinToken('login', { usuario, password });
     estadoApp = { token: data.token, rol: data.rol, nombre: data.nombre, empleadoId: data.empleadoId };
     sessionStorage.setItem('sesionFichajes', JSON.stringify(estadoApp));
     arrancarApp();
   } catch (e) {
-    mostrarError('error-login', e.message);
+    mostrarError('error-login', e.message || 'Error de conexión con el servidor');
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Entrar al Sistema';
@@ -873,7 +757,7 @@ async function apiSinToken(action, extra) {
     body: JSON.stringify(Object.assign({ action }, extra))
   });
   const json = await resp.json();
-  if (!json.ok) throw new Error(json.error);
+  if (!json.ok) throw new Error(json.error || 'Autenticación fallida');
   return json.data;
 }
 
@@ -945,13 +829,13 @@ document.querySelectorAll('.btn-fichar').forEach(btn => {
 
     const horaLocal = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
     
-    // Disable buttons immediately
+    // Disable buttons immediately during API flight
     document.querySelectorAll('.btn-fichar').forEach(b => b.disabled = true);
     
     // Immediate UI feedback
     pintarResumenHoy({
       estado: nuevoEstado,
-      horasTrabajadas: (parseFloat(document.getElementById('stat-horas').textContent) + 0.1).toFixed(1),
+      horasTrabajadas: (parseFloat(document.getElementById('stat-horas').textContent) || 0).toFixed(1),
       horasPausa: document.getElementById('stat-pausa').textContent.replace('h',''),
       fichajesHoy: [...(cacheResumen?.fichajesHoy || []), { tipo: tipo, hora: horaLocal }]
     });
@@ -971,11 +855,16 @@ document.querySelectorAll('.btn-fichar').forEach(btn => {
 });
 
 async function cargarResumenHoy() {
-  const resumen = await api('resumenHoy');
-  pintarResumenHoy(resumen);
+  try {
+    const resumen = await api('resumenHoy');
+    pintarResumenHoy(resumen);
+  } catch (e) {
+    mostrarError('error-fichaje', 'No se pudo cargar el resumen de hoy');
+  }
 }
 
 function pintarResumenHoy(r) {
+  if (!r) return;
   cacheResumen = r;
   const pill = document.getElementById('pill-estado');
   const etiquetas = { SIN_FICHAR: 'Sin fichar', TRABAJANDO: 'Trabajando', EN_PAUSA: 'En pausa', FINALIZADO: 'Jornada finalizada' };
@@ -988,9 +877,9 @@ function pintarResumenHoy(r) {
     pill.classList.remove('pulse-working');
   }
 
-  document.getElementById('stat-horas').textContent = r.horasTrabajadas + 'h';
-  document.getElementById('stat-pausa').textContent = r.horasPausa + 'h';
-  document.getElementById('tabla-fichajes-hoy').innerHTML = r.fichajesHoy.map(f =>
+  document.getElementById('stat-horas').textContent = (r.horasTrabajadas || '0.0') + 'h';
+  document.getElementById('stat-pausa').textContent = (r.horasPausa || '0.0') + 'h';
+  document.getElementById('tabla-fichajes-hoy').innerHTML = (r.fichajesHoy || []).map(f =>
     `<tr><td>${etiquetaVisual(f.tipo)}</td><td>${f.hora}</td></tr>`).join('') || '<tr><td colspan="2">Todavía no hay fichajes hoy</td></tr>';
   
   estadoApp._estadoActual = r.estado;
@@ -1013,10 +902,14 @@ function actualizarBotonesSegunEstado() {
 }
 
 async function cargarMiObra() {
-  const obra = await api('miObra');
-  document.getElementById('contenido-mi-obra').innerHTML = obra
-    ? `<b>${obra.nombre}</b><br><span style="color:var(--text-muted)">${obra.direccion || ''}</span><br><span class="estado-pill estado-TRABAJANDO" style="margin-top:10px;">${obra.estado}</span>`
-    : 'Sin obra asignada todavía.';
+  try {
+    const obra = await api('miObra');
+    document.getElementById('contenido-mi-obra').innerHTML = obra
+      ? `<b>${obra.nombre}</b><br><span style="color:var(--text-muted)">${obra.direccion || ''}</span><br><span class="estado-pill estado-TRABAJANDO" style="margin-top:10px;">${obra.estado || 'Activa'}</span>`
+      : 'Sin obra asignada todavía.';
+  } catch (e) {
+    document.getElementById('contenido-mi-obra').innerHTML = 'Error al obtener la información de la obra.';
+  }
 }
 
 document.getElementById('btn-enviar-correccion').addEventListener('click', async () => {
@@ -1033,29 +926,37 @@ document.getElementById('btn-enviar-correccion').addEventListener('click', async
 });
 
 async function cargarMisCorrecciones() {
-  const filas = await api('misCorrecciones');
-  document.getElementById('tabla-mis-correcciones').innerHTML = filas.map(f =>
-    `<tr><td>${f.fecha}</td><td>${etiquetaVisual(f.tipoSolicitado)}</td><td><span class="estado-pill">${f.estado}</span></td></tr>`
-  ).join('') || '<tr><td colspan="3">Sin solicitudes</td></tr>';
+  try {
+    const filas = await api('misCorrecciones');
+    document.getElementById('tabla-mis-correcciones').innerHTML = (filas || []).map(f =>
+      `<tr><td>${f.fecha}</td><td>${etiquetaVisual(f.tipoSolicitado)}</td><td><span class="estado-pill">${f.estado}</span></td></tr>`
+    ).join('') || '<tr><td colspan="3">Sin solicitudes</td></tr>';
+  } catch (e) {
+    document.getElementById('tabla-mis-correcciones').innerHTML = '<tr><td colspan="3">Error al cargar solicitudes</td></tr>';
+  }
 }
 
 async function cargarNotificaciones() {
-  const notifs = await api('misNotificaciones');
-  const noLeidas = notifs.filter(n => !n.leida).length;
-  const badge = document.getElementById('badge-notif');
-  badge.textContent = noLeidas;
-  badge.classList.toggle('oculto', noLeidas === 0);
-  document.getElementById('lista-notificaciones').innerHTML = notifs.map(n =>
-    `<div class="notif ${n.leida ? '' : 'no-leida'}" data-id="${n.id}"><b>${n.titulo}</b>${n.mensaje}<br><small>${new Date(n.fecha).toLocaleString('es-ES')}</small></div>`
-  ).join('') || '<p style="color:var(--text-muted)">No tienes notificaciones.</p>';
+  try {
+    const notifs = await api('misNotificaciones') || [];
+    const noLeidas = notifs.filter(n => !n.leida).length;
+    const badge = document.getElementById('badge-notif');
+    badge.textContent = noLeidas;
+    badge.classList.toggle('oculto', noLeidas === 0);
+    document.getElementById('lista-notificaciones').innerHTML = notifs.map(n =>
+      `<div class="notif ${n.leida ? '' : 'no-leida'}" data-id="${n.id}"><b>${n.titulo}</b>${n.mensaje}<br><small>${new Date(n.fecha).toLocaleString('es-ES')}</small></div>`
+    ).join('') || '<p style="color:var(--text-muted)">No tienes notificaciones.</p>';
 
-  document.querySelectorAll('#lista-notificaciones .notif.no-leida').forEach(el => {
-    el.addEventListener('click', async () => {
-      await api('marcarNotificacionLeida', { notifId: el.dataset.id });
-      el.classList.remove('no-leida');
-      cargarNotificaciones();
+    document.querySelectorAll('#lista-notificaciones .notif.no-leida').forEach(el => {
+      el.addEventListener('click', async () => {
+        await api('marcarNotificacionLeida', { notifId: el.dataset.id });
+        el.classList.remove('no-leida');
+        cargarNotificaciones();
+      });
     });
-  });
+  } catch (e) {
+    console.error('Error cargando notificaciones:', e);
+  }
 }
 
 document.getElementById('btn-marcar-todas').addEventListener('click', () => {
@@ -1072,40 +973,47 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 });
 
 async function cargarAdmin() {
-  const [equipo, empleados, obras, correcciones] = await Promise.all([
-    api('adminEstadoEquipo'), api('adminListEmpleados'), api('adminListObras'), api('adminListCorrecciones')
-  ]);
+  try {
+    const [equipo, empleados, obras, correcciones] = await Promise.all([
+      api('adminEstadoEquipo').catch(() => []),
+      api('adminListEmpleados').catch(() => []),
+      api('adminListObras').catch(() => []),
+      api('adminListCorrecciones').catch(() => [])
+    ]);
 
-  const mapaObras = {}; obras.forEach(o => mapaObras[o.id] = o.nombre);
-  const mapaEmpleados = {}; empleados.forEach(e => mapaEmpleados[e.id] = e);
+    const mapaObras = {}; (obras || []).forEach(o => mapaObras[o.id] = o.nombre);
+    const mapaEmpleados = {}; (empleados || []).forEach(e => mapaEmpleados[e.id] = e);
 
-  document.getElementById('tabla-equipo').innerHTML = equipo.map(e =>
-    `<tr><td>${e.nombre}</td><td><span class="estado-pill estado-${e.estado}">${e.estado}</span></td><td>${e.horasTrabajadas}h</td><td>${mapaObras[mapaEmpleados[e.empleadoId]?.obraId] || '—'}</td></tr>`
-  ).join('');
+    document.getElementById('tabla-equipo').innerHTML = (equipo || []).map(e =>
+      `<tr><td>${e.nombre}</td><td><span class="estado-pill estado-${e.estado}">${e.estado}</span></td><td>${e.horasTrabajadas || 0}h</td><td>${mapaObras[mapaEmpleados[e.empleadoId]?.obraId] || '—'}</td></tr>`
+    ).join('') || '<tr><td colspan="4">Sin datos de equipo</td></tr>';
 
-  document.getElementById('tabla-obras').innerHTML = obras.map(o =>
-    `<tr><td>${o.nombre}</td><td>${o.direccion || ''}</td><td><span class="estado-pill">${o.estado}</span></td></tr>`
-  ).join('') || '<tr><td colspan="3">Sin obras creadas</td></tr>';
+    document.getElementById('tabla-obras').innerHTML = (obras || []).map(o =>
+      `<tr><td>${o.nombre}</td><td>${o.direccion || ''}</td><td><span class="estado-pill">${o.estado || 'Activa'}</span></td></tr>`
+    ).join('') || '<tr><td colspan="3">Sin obras creadas</td></tr>';
 
-  const opcionesEmpleados = empleados.filter(e => e.rol === 'empleado').map(e => `<option value="${e.id}">${e.nombre}</option>`).join('');
-  document.getElementById('asignar-empleado').innerHTML = opcionesEmpleados;
-  document.getElementById('informe-empleado').innerHTML = opcionesEmpleados;
-  document.getElementById('asignar-obra').innerHTML = obras.map(o => `<option value="${o.id}">${o.nombre}</option>`).join('');
+    const opcionesEmpleados = (empleados || []).filter(e => e.rol === 'empleado').map(e => `<option value="${e.id}">${e.nombre}</option>`).join('');
+    document.getElementById('asignar-empleado').innerHTML = opcionesEmpleados;
+    document.getElementById('informe-empleado').innerHTML = opcionesEmpleados;
+    document.getElementById('asignar-obra').innerHTML = (obras || []).map(o => `<option value="${o.id}">${o.nombre}</option>`).join('');
 
-  document.getElementById('tabla-correcciones').innerHTML = correcciones.map(c =>
-    `<tr><td>${mapaEmpleados[c.empleadoId]?.nombre || c.empleadoId}</td><td>${c.fecha}</td><td>${etiquetaVisual(c.tipoSolicitado)} → ${c.horaSolicitada}</td><td>${c.motivo}</td>
-     <td><button class="btn btn-primario" style="width:auto;padding:4px 10px;font-size:12px;display:inline-block;" onclick="resolverCorreccion('${c.id}', true)">Aprobar</button>
-     <button class="btn btn-borde" style="width:auto;padding:4px 10px;font-size:12px;display:inline-block;margin-left:6px;" onclick="resolverCorreccion('${c.id}', false)">Rechazar</button></td></tr>`
-  ).join('') || '<tr><td colspan="5">No hay solicitudes pendientes</td></tr>';
+    document.getElementById('tabla-correcciones').innerHTML = (correcciones || []).map(c =>
+      `<tr><td>${mapaEmpleados[c.empleadoId]?.nombre || c.empleadoId}</td><td>${c.fecha}</td><td>${etiquetaVisual(c.tipoSolicitado)} → ${c.horaSolicitada}</td><td>${c.motivo}</td>
+       <td><button class="btn btn-primario" style="width:auto;padding:4px 10px;font-size:12px;display:inline-block;" onclick="resolverCorreccion('${c.id}', true)">Aprobar</button>
+       <button class="btn btn-borde" style="width:auto;padding:4px 10px;font-size:12px;display:inline-block;margin-left:6px;" onclick="resolverCorreccion('${c.id}', false)">Rechazar</button></td></tr>`
+    ).join('') || '<tr><td colspan="5">No hay solicitudes pendientes</td></tr>';
 
-  const hoy = new Date();
-  if (!document.getElementById('informe-mes').value) document.getElementById('informe-mes').value = hoy.getMonth() + 1;
-  if (!document.getElementById('informe-anio').value) document.getElementById('informe-anio').value = hoy.getFullYear();
+    const hoy = new Date();
+    if (!document.getElementById('informe-mes').value) document.getElementById('informe-mes').value = hoy.getMonth() + 1;
+    if (!document.getElementById('informe-anio').value) document.getElementById('informe-anio').value = hoy.getFullYear();
 
-  const auditoria = await api('adminAuditoria', { limite: 200 });
-  document.getElementById('tabla-auditoria').innerHTML = auditoria.map(a =>
-    `<tr><td>${new Date(a.timestamp).toLocaleString('es-ES')}</td><td>${mapaEmpleados[a.actorId]?.nombre || a.actorId}</td><td>${a.rol}</td><td>${a.accion}</td><td>${a.detalle}</td></tr>`
-  ).join('');
+    const auditoria = await api('adminAuditoria', { limite: 200 }).catch(() => []);
+    document.getElementById('tabla-auditoria').innerHTML = (auditoria || []).map(a =>
+      `<tr><td>${new Date(a.timestamp).toLocaleString('es-ES')}</td><td>${mapaEmpleados[a.actorId]?.nombre || a.actorId}</td><td>${a.rol}</td><td>${a.accion}</td><td>${a.detalle}</td></tr>`
+    ).join('') || '<tr><td colspan="5">Sin registros de auditoría</td></tr>';
+  } catch (e) {
+    console.error("Error al cargar panel de administración:", e);
+  }
 }
 
 async function resolverCorreccion(correccionId, aprobar) {
